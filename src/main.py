@@ -6,7 +6,7 @@ from src.users.routers import router as users_router
 from src.admin.routers import router as admin_router
 
 app = FastAPI(
-    title="FastAPI-Pattern"
+    title="ToDo-API"
 )
 
 app.include_router(users_router)
