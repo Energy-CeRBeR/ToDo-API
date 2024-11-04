@@ -8,6 +8,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
 
+from src.tasks.models import Task
+from src.categories.models import Category
+
 
 class Roles(Enum):
     user = "user"

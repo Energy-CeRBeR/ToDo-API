@@ -28,6 +28,7 @@ class Task(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="tasks", uselist=False)
+
     category: Mapped["Category"] = relationship(back_populates="tasks", uselist=False)
 
     def to_dict(self) -> Dict[str, Any]:
