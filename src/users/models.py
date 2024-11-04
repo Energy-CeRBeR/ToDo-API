@@ -54,4 +54,6 @@ class User(Base):
             "is_verified": self.is_verified,
             "is_active": self.is_active,
             "created_at": self.created_at,
+            "categories": [category.to_dict() for category in self.categories],
+            "tasks": [task.to_dict() for task in self.tasks],
         }

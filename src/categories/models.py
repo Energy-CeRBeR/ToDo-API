@@ -53,5 +53,6 @@ class Category(Base):
             "name": self.name,
             "color": self.color,
             "user_id": self.user_id,
-            "created_at": self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
+            "tasks": [task.to_dict() for task in self.tasks],
         }
