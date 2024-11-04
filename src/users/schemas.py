@@ -1,5 +1,10 @@
 from datetime import datetime
+from typing import List
+
 from pydantic import BaseModel
+
+from src.categories.schemas import CategoryResponse
+from src.tasks.schemas import TaskResponse
 
 from src.users.models import Gender, Roles
 
@@ -44,3 +49,5 @@ class UserResponse(BaseModel):
     is_verified: bool
     is_active: bool
     created_at: datetime
+    tasks: List[TaskResponse]
+    categories: List[CategoryResponse]
