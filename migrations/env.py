@@ -12,6 +12,7 @@ from src.database import Base
 
 from src.users.models import User  # noqa
 from src.categories.models import Category  # noqa
+from src.tasks.models import Task  # noqa
 
 from alembic import context
 

@@ -43,6 +43,10 @@ class Category(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
 
+    user: Mapped["User"] = relationship(back_populates="categories", uselist=False)
+    tasks: Mapped[List["Task"]] = relationship(back_populates="category", uselist=True, lazy="selectin",
+                                               cascade="all, delete-orphan")
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,

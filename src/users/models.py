@@ -1,10 +1,10 @@
 import datetime
 
 from enum import Enum
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
 
@@ -33,6 +33,11 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
     password_hash: Mapped[bytes] = mapped_column()
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+
+    categories: Mapped[List["Category"]] = relationship(back_populates="user", uselist=True, lazy="selectin",
+                                                        cascade="all, delete-orphan")
+    tasks: Mapped[List["Task"]] = relationship(back_populates="user", uselist=True, lazy="selectin",
+                                               cascade="all, delete-orphan")
 
     def to_dict(self) -> Dict[str, Any]:
         return {

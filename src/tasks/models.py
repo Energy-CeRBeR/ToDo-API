@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Dict, Any
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
 
@@ -26,6 +26,9 @@ class Task(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id", ondelete="CASCADE"))
     created_at: Mapped[datetime.datetime] = mapped_column(nullable=False)
+
+    user: Mapped["User"] = relationship(back_populates="tasks", uselist=False)
+    category: Mapped["Category"] = relationship(back_populates="tasks", uselist=False)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
