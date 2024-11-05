@@ -5,7 +5,7 @@ from src.tasks.repositories import TaskRepository
 from src.tasks.schemas import TaskCreate, TaskEdit
 
 
-class ReportService:
+class TaskService:
     repository = TaskRepository()
 
     async def create_task(self, task: TaskCreate, user_id: int) -> Task:

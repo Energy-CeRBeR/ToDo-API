@@ -4,6 +4,10 @@ from pydantic import BaseModel
 from src.tasks.models import Priority
 
 
+class SuccessfulResponse(BaseModel):
+    success: str = "ok"
+
+
 class TaskCreate(BaseModel):
     name: str
     description: str
