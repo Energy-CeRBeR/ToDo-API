@@ -25,10 +25,9 @@ class Task(Base):
     completed: Mapped[bool] = mapped_column(default=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id", ondelete="CASCADE"))
-    created_at: Mapped[datetime.datetime] = mapped_column(nullable=False)
+    date: Mapped[datetime.date] = mapped_column(nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="tasks", uselist=False)
-
     category: Mapped["Category"] = relationship(back_populates="tasks", uselist=False)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -40,5 +39,5 @@ class Task(Base):
             "completed": self.completed,
             "user_id": self.user_id,
             "category_id": self.category_id,
-            "created_at": self.created_at.isoformat()
+            "date": self.date.isoformat()
         }

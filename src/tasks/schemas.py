@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from pydantic import BaseModel
 
 from src.tasks.models import Priority
@@ -12,17 +12,15 @@ class TaskCreate(BaseModel):
     name: str
     description: str
     priority: Priority
-    completed: bool
     category_id: int
-    created_at: datetime
+    date: datetime.date
 
 
 class TaskEdit(BaseModel):
     name: str
     description: str
-    completed: bool
     category_id: int
-    created_at: datetime
+    date: datetime.date
 
 
 class TaskResponse(BaseModel):
@@ -32,4 +30,4 @@ class TaskResponse(BaseModel):
     completed: bool
     user_id: int
     category_id: int
-    created_at: datetime
+    date: datetime.date

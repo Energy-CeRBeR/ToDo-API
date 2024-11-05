@@ -34,7 +34,7 @@ async def create_task(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         new_task: TaskCreate
 ) -> TaskResponse:
-    task = await TaskService.create_task(new_task, current_user.id)
+    task = await TaskService().create_task(new_task, current_user.id)
     return TaskResponse(**task.to_dict())
 
 
