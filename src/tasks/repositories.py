@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import insert, select, delete, update
 
@@ -8,13 +8,16 @@ from src.tasks.schemas import TaskCreate, TaskEdit
 
 from src.database import async_session
 
+MIN_ID = 10000000
+MAX_ID = 99999999
+
 
 class TaskRepository:
 
     async def generate_id(self) -> int:
-        unique_id = random.randint(10000000, 99999999)
+        unique_id = random.randint(MIN_ID, MAX_ID)
         while await self.get_task_by_id(unique_id):
-            unique_id = random.randint(10000000, 99999999)
+            unique_id = random.randint(MIN_ID, MAX_ID)
 
         return unique_id
 
@@ -38,6 +41,13 @@ class TaskRepository:
 
             return task
 
+    async def get_all_user_tasks(self, user_id: int) -> List[Task]:
+        async with async_session() as session:
+            stmt = select(Task).where(Task.user_id == user_id)
+            result = await session.execute(stmt)
+            tasks = result.scalars().all()
+        return tasks
+
     async def edit_task(self, task: Task, edited_task: TaskEdit) -> Task:
         task_dc = edited_task.dict()
         task_dc["priority"] = task.priority
@@ -49,7 +59,7 @@ class TaskRepository:
             task: Task = await self.get_task_by_id(task.id)
             return task
 
-    async def edit_task_status(self, task: Task) -> Task:
+    async def change_task_status(self, task: Task) -> Task:
         async with async_session() as session:
             stmt = update(Task).where(Task.id == task.id).values(completed=False if task.completed else True)
             await session.execute(stmt)
