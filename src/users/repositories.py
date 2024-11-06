@@ -1,15 +1,14 @@
 import random
 from typing import Optional
 
+from fastapi import HTTPException
+
 from sqlalchemy import insert, select, delete, update
 
 from config_data.config import Config, load_config
 from utils import auth_settings
 from src.users.models import User
 from src.users.schemas import UserCreate, UserEdit
-
-from fastapi import HTTPException
-
 from src.database import async_session
 
 settings: Config = load_config(".env")
