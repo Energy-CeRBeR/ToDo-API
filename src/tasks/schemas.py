@@ -19,6 +19,7 @@ class TaskCreate(BaseModel):
 class TaskEdit(BaseModel):
     name: str
     description: str
+    priority: Priority
     category_id: int
     date: datetime.date
 

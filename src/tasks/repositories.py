@@ -51,7 +51,6 @@ class TaskRepository:
 
     async def edit_task(self, task: Task, edited_task: TaskEdit) -> Task:
         task_dc = edited_task.dict()
-        task_dc["priority"] = task.priority
         async with async_session() as session:
             stmt = update(Task).where(Task.id == task.id).values(**task_dc)
             await session.execute(stmt)
