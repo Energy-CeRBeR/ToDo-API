@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.tasks.schemas import TaskResponse, TaskCreate, TaskEdit, SuccessfulResponse
 from src.tasks.services import TaskService
+from src.categories.services import CategoryService
 
 from src.users.models import User
 from src.users.services import UserService
@@ -34,6 +35,13 @@ async def create_task(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         new_task: TaskCreate
 ) -> TaskResponse:
+    category = await CategoryService().get_category_by_id(new_task.category_id)
+
+    if category is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if category.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied!")
+
     task = await TaskService().create_task(new_task, current_user.id)
     return TaskResponse(**task.to_dict())
 
@@ -44,10 +52,17 @@ async def edit_task(
         task_id: int,
         edited_task: TaskEdit
 ) -> TaskResponse:
+    category = await CategoryService().get_category_by_id(edited_task.category_id)
+
+    if category is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if category.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied!")
+
     task = await TaskService().get_task_by_id(task_id)
+
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
-
     if task.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied!")
 
@@ -62,9 +77,9 @@ async def change_task_status(
         task_id: int
 ) -> TaskResponse:
     task = await TaskService().get_task_by_id(task_id)
+
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
-
     if task.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied!")
 
@@ -79,9 +94,9 @@ async def delete_task(
         task_id: int
 ) -> SuccessfulResponse:
     task = await TaskService().get_task_by_id(task_id)
+
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
-
     if task.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied!")
 
