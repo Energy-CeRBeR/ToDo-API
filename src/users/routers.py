@@ -6,12 +6,20 @@ from src.users.models import User
 from src.users.schemas import UserCreate, Token, UserResponse, SuccessfulResponse, UserEdit
 from src.users.services import UserService
 
+from src.categories.services import CategoryService
+from src.categories.schemas import CategoryCreate
+from src.categories.models import Colors
+
 router = APIRouter(tags=["user"], prefix="/user")
 
 
 @router.post("/register")
 async def register(user_create: UserCreate) -> Token:
     user = await UserService().create_user(user_create)
+
+    category = CategoryCreate(name="base_category", color=Colors.WHITE)
+    await CategoryService().create_category(category, user.id)
+
     access_token = UserService().create_access_token(user)
     refresh_token = UserService().create_refresh_token(user)
     return Token(access_token=access_token, refresh_token=refresh_token)
