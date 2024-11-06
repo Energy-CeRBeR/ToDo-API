@@ -8,6 +8,10 @@ from src.tasks.schemas import TaskResponse
 from src.categories.models import Colors
 
 
+class SuccessfulResponse(BaseModel):
+    success: str = "ok"
+
+
 class CategoryCreate(BaseModel):
     name: str
     color: Colors
