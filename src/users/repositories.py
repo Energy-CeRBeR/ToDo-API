@@ -3,6 +3,7 @@ from typing import Optional
 
 from sqlalchemy import insert, select, delete, update
 
+from config_data.config import Config, load_config
 from utils import auth_settings
 from src.users.models import User
 from src.users.schemas import UserCreate, UserEdit
@@ -11,13 +12,17 @@ from fastapi import HTTPException
 
 from src.database import async_session
 
+settings: Config = load_config(".env")
+global_vars = settings.variablesData
+
 
 class UserRepository:
     async def generate_id(self) -> int:
-        new_id = random.randint(10000000, 99999999)
-        while await self.get_user_by_id(new_id):
-            new_id = random.randint(10000000, 99999999)
-        return new_id
+        unique_id = random.randint(global_vars.MIN_ID, global_vars.MAX_ID)
+        while await self.get_user_by_id(unique_id):
+            unique_id = random.randint(global_vars.MIN_ID, global_vars.MAX_ID)
+
+        return unique_id
 
     async def create_user(self, user: UserCreate) -> User:
         async with async_session() as session:

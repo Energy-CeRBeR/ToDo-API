@@ -3,21 +3,22 @@ from typing import Optional, List
 
 from sqlalchemy import insert, select, delete, update
 
+from config_data.config import Config, load_config
 from src.tasks.models import Task
 from src.tasks.schemas import TaskCreate, TaskEdit
 
 from src.database import async_session
 
-MIN_ID = 10000000
-MAX_ID = 99999999
+settings: Config = load_config(".env")
+global_vars = settings.variablesData
 
 
 class TaskRepository:
 
     async def generate_id(self) -> int:
-        unique_id = random.randint(MIN_ID, MAX_ID)
+        unique_id = random.randint(global_vars.MIN_ID, global_vars.MAX_ID)
         while await self.get_task_by_id(unique_id):
-            unique_id = random.randint(MIN_ID, MAX_ID)
+            unique_id = random.randint(global_vars.MIN_ID, global_vars.MAX_ID)
 
         return unique_id
 
@@ -50,7 +51,6 @@ class TaskRepository:
 
     async def edit_task(self, task: Task, edited_task: TaskEdit) -> Task:
         task_dc = edited_task.dict()
-        task_dc["priority"] = task.priority
         async with async_session() as session:
             stmt = update(Task).where(Task.id == task.id).values(**task_dc)
             await session.execute(stmt)

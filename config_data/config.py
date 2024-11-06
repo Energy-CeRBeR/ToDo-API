@@ -28,9 +28,16 @@ class AuthJWT:
 
 
 @dataclass
+class VariablesData:
+    MIN_ID: int
+    MAX_ID: int
+
+
+@dataclass
 class Config:
     database: DataBase
     authJWT: AuthJWT
+    variablesData: VariablesData
 
 
 def load_config(path: str | None = None) -> Config:
@@ -43,11 +50,15 @@ def load_config(path: str | None = None) -> Config:
             DB_PORT=env("DB_PORT"),
             DB_USER=env("DB_USER"),
             DB_PASS=env("DB_PASS"),
-            DB_NAME=env("DB_NAME"),
+            DB_NAME=env("DB_NAME")
         ),
         authJWT=AuthJWT(
             private_key_path=AuthJWT.private_key_path,
             public_key_path=AuthJWT.public_key_path,
             algorithm=AuthJWT.algorithm
+        ),
+        variablesData=VariablesData(
+            MIN_ID=int(env("MIN_ID")),
+            MAX_ID=int(env("MAX_ID"))
         )
     )

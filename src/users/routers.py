@@ -48,12 +48,6 @@ async def login_for_access_token(
     return UserResponse(**current_user.to_dict())
 
 
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user_by_id(user_id: int) -> UserResponse:
-    user = await UserService().get_user_by_id(user_id)
-    return UserResponse(**user.to_dict())
-
-
 @router.put("/edit", response_model=UserResponse)
 async def edit_user(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
@@ -63,7 +57,7 @@ async def edit_user(
     return UserResponse(**upd_user.to_dict())
 
 
-@router.delete("", response_model=SuccessfulResponse)
+@router.delete("/", response_model=SuccessfulResponse)
 async def delete_user(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
 ) -> SuccessfulResponse:
