@@ -1,12 +1,14 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from src.categories.schemas import CategoryResponse, CategoryCreate, CategoryEdit, SuccessfulResponse
 from src.categories.services import CategoryService
+from src.categories.exceptions import NotFoundException
 
 from src.users.models import User
 from src.users.services import UserService
+from src.users.exceptions import AccessException
 
 router = APIRouter(tags=["categories"], prefix="/categories")
 
@@ -26,7 +28,7 @@ async def get_category(
 ) -> CategoryResponse:
     category = await CategoryService().get_category_by_id(category_id)
     if category is None:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise NotFoundException()
 
     return CategoryResponse(**category.to_dict())
 
@@ -48,10 +50,10 @@ async def edit_category(
 ) -> CategoryResponse:
     category = await CategoryService().get_category_by_id(category_id)
     if category is None:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise NotFoundException()
 
     if category.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     upd_category = await CategoryService().edit_category(category, edited_category)
 
@@ -66,9 +68,9 @@ async def delete_category(
     category = await CategoryService().get_category_by_id(category_id)
 
     if category is None:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise NotFoundException()
     if category.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     await CategoryService().delete_category(category)
 
