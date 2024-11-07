@@ -1,13 +1,17 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from src.tasks.schemas import TaskResponse, TaskCreate, TaskEdit, SuccessfulResponse
 from src.tasks.services import TaskService
+from src.tasks.exceptions import NotFoundException as TaskNotFoundException
+
 from src.categories.services import CategoryService
+from src.categories.exceptions import NotFoundException as CategoryNotFoundException
 
 from src.users.models import User
 from src.users.services import UserService
+from src.users.exceptions import AccessException
 
 router = APIRouter(tags=["tasks"], prefix="/tasks")
 
@@ -20,12 +24,12 @@ async def get_all_tasks(current_user: Annotated[User, Depends(UserService().get_
 
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(
-        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        current_user: Annotated[User, Depends(UserService().get_current_user)],  # noqa
         task_id: int
 ) -> TaskResponse:
     task = await TaskService().get_task_by_id(task_id)
     if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise TaskNotFoundException()
 
     return TaskResponse(**task.to_dict())
 
@@ -38,9 +42,9 @@ async def create_task(
     category = await CategoryService().get_category_by_id(new_task.category_id)
 
     if category is None:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise CategoryNotFoundException()
     if category.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     task = await TaskService().create_task(new_task, current_user.id)
     return TaskResponse(**task.to_dict())
@@ -55,16 +59,16 @@ async def edit_task(
     category = await CategoryService().get_category_by_id(edited_task.category_id)
 
     if category is None:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise CategoryNotFoundException()
     if category.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     task = await TaskService().get_task_by_id(task_id)
 
     if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise TaskNotFoundException()
     if task.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     upd_task = await TaskService().edit_task(task, edited_task)
 
@@ -79,9 +83,9 @@ async def change_task_status(
     task = await TaskService().get_task_by_id(task_id)
 
     if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise TaskNotFoundException()
     if task.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     upd_task = await TaskService().change_task_status(task)
 
@@ -96,9 +100,9 @@ async def delete_task(
     task = await TaskService().get_task_by_id(task_id)
 
     if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise TaskNotFoundException()
     if task.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied!")
+        raise AccessException()
 
     await TaskService().delete_task(task)
 
