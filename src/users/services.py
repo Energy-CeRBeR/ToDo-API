@@ -1,7 +1,7 @@
 import jwt
 
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, List
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -11,7 +11,7 @@ from utils.auth_settings import validate_password, decode_jwt, encode_jwt
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.schemas import UserCreate, TokenData, UserEdit
-from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException
+from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException, AccessException
 
 http_bearer = HTTPBearer()
 
@@ -73,11 +73,12 @@ class UserService:
 
         return user
 
-    async def validate_user(
-            self,
-            expected_token_type: str,
-            token: str | bytes,
-    ) -> User:
+    async def validate_admin_user(self, user) -> User:
+        if not user.is_admin:
+            raise AccessException()
+        return user
+
+    async def validate_user(self, expected_token_type: str, token: str | bytes) -> User:
 
         try:
             payload = decode_jwt(token=token)
@@ -107,11 +108,18 @@ class UserService:
     async def get_current_user(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
         return await self.validate_user(expected_token_type=ACCESS_TOKEN_TYPE, token=token.credentials)
 
+    async def get_current_admin_user(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
+        current_user = await self.get_current_user(token)
+        return await self.validate_admin_user(current_user)
+
     async def get_user_by_id(self, user_id: int) -> User:
         user = await self.repository.get_user_by_id(user_id)
         if user is None:
             raise NotFoundException()
         return user
+
+    async def get_all_users(self) -> List[User]:
+        return await self.repository.get_all_users()
 
     async def create_user(self, user: UserCreate) -> User:
         return await self.repository.create_user(user)
@@ -121,6 +129,15 @@ class UserService:
 
     async def edit_user_password(self, user: User, password: str) -> None:
         return await self.repository.edit_password(user, password)
+
+    async def change_admin_status(self, user: User) -> User:
+        return await self.repository.change_admin_status(user)
+
+    async def change_verified_status(self, user: User) -> User:
+        return await self.repository.change_verified_status(user)
+
+    async def change_active_status(self, user: User) -> User:
+        return await self.repository.change_active_status(user)
 
     async def delete_user(self, user: User) -> None:
         return await self.repository.delete_user(user)
