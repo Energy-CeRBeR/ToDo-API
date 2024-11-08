@@ -32,6 +32,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True)
     gender: Mapped[Gender] = mapped_column(default=Gender.male)
     role: Mapped[Roles] = mapped_column(default=Roles.user)
+    is_admin: Mapped[bool] = mapped_column(default=False)
     is_verified: Mapped[bool] = mapped_column(default=False)
     is_active: Mapped[bool] = mapped_column(default=True)
     password_hash: Mapped[bytes] = mapped_column()
