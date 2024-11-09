@@ -26,9 +26,11 @@ async def register(user_create: UserCreate) -> Token:
 
 
 @router.post("/login", response_model=Token)
-async def authenticate_user_jwt(user: User = Depends(UserService().authenticate_user)) -> Token:
-    access_token = UserService().create_access_token(user)
-    refresh_token = UserService().create_refresh_token(user)
+async def authenticate_user_jwt(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+) -> Token:
+    access_token = UserService().create_access_token(current_user)
+    refresh_token = UserService().create_refresh_token(current_user)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
