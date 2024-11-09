@@ -46,6 +46,7 @@ class UserResponse(BaseModel):
     email: str
     gender: Gender
     role: Roles
+    is_admin: bool
     is_verified: bool
     is_active: bool
     created_at: datetime

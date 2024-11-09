@@ -52,6 +52,7 @@ class User(Base):
             "email": self.email,
             "gender": self.gender.value,
             "role": self.role.value,
+            "is_admin": self.is_admin,
             "is_verified": self.is_verified,
             "is_active": self.is_active,
             "created_at": self.created_at,
