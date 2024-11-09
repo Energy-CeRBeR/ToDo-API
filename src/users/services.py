@@ -11,7 +11,8 @@ from utils.auth_settings import validate_password, decode_jwt, encode_jwt
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.schemas import UserCreate, TokenData, UserEdit
-from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException, AccessException
+from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException, AccessException, \
+    EmailExistsException, ShortNameExistsException
 
 http_bearer = HTTPBearer()
 
@@ -73,7 +74,8 @@ class UserService:
 
         return user
 
-    async def validate_admin_user(self, user) -> User:
+    @staticmethod
+    async def validate_admin_user(user) -> User:
         if not user.is_admin:
             raise AccessException()
         return user
@@ -122,6 +124,12 @@ class UserService:
         return await self.repository.get_all_users()
 
     async def create_user(self, user: UserCreate) -> User:
+        if self.repository.get_user_by_email(user.email) is not None:
+            raise EmailExistsException()
+
+        if self.repository.get_user_by_short_name(user.short_name) is not None:
+            raise ShortNameExistsException()
+
         return await self.repository.create_user(user)
 
     async def edit_user_info(self, user: User, user_edit: UserEdit) -> User:

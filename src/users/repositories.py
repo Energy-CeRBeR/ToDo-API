@@ -9,7 +9,6 @@ from src.database import async_session
 
 from src.users.models import User
 from src.users.schemas import UserCreate, UserEdit
-from src.users.exceptions import EmailExistsException, ShortNameExistsException
 
 settings: Config = load_config(".env")
 global_vars = settings.variablesData
@@ -23,23 +22,9 @@ class UserRepository:
 
         return unique_id
 
-    async def create_user(self, user: UserCreate) -> User:
-        async with async_session() as session:
-            query = select(User).where(User.email == user.email)
-            result = await session.execute(query)
-            potential_user_1 = result.mappings().all()
-        if potential_user_1:
-            raise EmailExistsException()
-
-        async with async_session() as session:
-            query = select(User).where(User.short_name == user.short_name)
-            result = await session.execute(query)
-            potential_user_2 = result.mappings().all()
-        if potential_user_2:
-            raise ShortNameExistsException()
-
-        password = user.password
-        user_dc = user.dict(exclude={"password"})
+    async def create_user(self, new_user: UserCreate) -> User:
+        password = new_user.password
+        user_dc = new_user.dict(exclude={"password"})
         user_dc["password_hash"] = auth_settings.hash_password(password)
         user_dc["id"] = await self.generate_id()
 
