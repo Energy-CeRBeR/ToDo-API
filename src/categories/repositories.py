@@ -4,10 +4,10 @@ from typing import Optional, List
 from sqlalchemy import insert, select, delete, update
 
 from config_data.config import Config, load_config
+from src.database import async_session
+
 from src.categories.models import Category
 from src.categories.schemas import CategoryCreate, CategoryEdit
-
-from src.database import async_session
 
 settings: Config = load_config(".env")
 global_vars = settings.variablesData

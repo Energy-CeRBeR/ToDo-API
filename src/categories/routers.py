@@ -4,11 +4,9 @@ from fastapi import APIRouter, Depends
 
 from src.categories.schemas import CategoryResponse, CategoryCreate, CategoryEdit, SuccessfulResponse
 from src.categories.services import CategoryService
-from src.categories.exceptions import NotFoundException
 
 from src.users.models import User
 from src.users.services import UserService
-from src.users.exceptions import AccessException
 
 router = APIRouter(tags=["categories"], prefix="/categories")
 
@@ -23,13 +21,10 @@ async def get_all_categories(
 
 @router.get("/{category_id}", response_model=CategoryResponse)
 async def get_category(
-        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        current_user: Annotated[User, Depends(UserService().get_current_user)],  # noqa
         category_id: int
 ) -> CategoryResponse:
     category = await CategoryService().get_category_by_id(category_id)
-    if category is None:
-        raise NotFoundException()
-
     return CategoryResponse(**category.to_dict())
 
 
@@ -48,15 +43,7 @@ async def edit_category(
         category_id: int,
         edited_category: CategoryEdit
 ) -> CategoryResponse:
-    category = await CategoryService().get_category_by_id(category_id)
-    if category is None:
-        raise NotFoundException()
-
-    if category.user_id != current_user.id:
-        raise AccessException()
-
-    upd_category = await CategoryService().edit_category(category, edited_category)
-
+    upd_category = await CategoryService().edit_category(edited_category, category_id, current_user.id)
     return CategoryResponse(**upd_category.to_dict())
 
 
@@ -65,13 +52,5 @@ async def delete_category(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         category_id: int
 ) -> SuccessfulResponse:
-    category = await CategoryService().get_category_by_id(category_id)
-
-    if category is None:
-        raise NotFoundException()
-    if category.user_id != current_user.id:
-        raise AccessException()
-
-    await CategoryService().delete_category(category)
-
+    await CategoryService().delete_category(category_id, current_user.id)
     return SuccessfulResponse()
