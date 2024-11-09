@@ -132,3 +132,9 @@ class UserRepository:
             stmt = delete(User).where(User.id == user.id)
             await session.execute(stmt)
             await session.commit()
+
+    async def delete_user_by_id(self, user_id: int) -> None:
+        async with async_session() as session:
+            stmt = delete(User).where(User.id == user_id)
+            await session.execute(stmt)
+            await session.commit()

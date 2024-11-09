@@ -130,14 +130,41 @@ class UserService:
     async def edit_user_password(self, user: User, password: str) -> None:
         return await self.repository.edit_password(user, password)
 
-    async def change_admin_status(self, user: User) -> User:
+    async def change_admin_status(self, user_id: int) -> User:
+        user = await self.get_user_by_id(user_id)
+        if user is None:
+            raise NotFoundException()
+        if user.is_admin:
+            raise AccessException()
+
         return await self.repository.change_admin_status(user)
 
-    async def change_verified_status(self, user: User) -> User:
+    async def change_verified_status(self, user_id: int) -> User:
+        user = await self.get_user_by_id(user_id)
+        if user is None:
+            raise NotFoundException()
+        if user.is_admin:
+            raise AccessException()
+
         return await self.repository.change_verified_status(user)
 
-    async def change_active_status(self, user: User) -> User:
-        return await self.repository.change_active_status(user)
+    async def change_active_status(self, user_id: int) -> User:
+        user = await self.get_user_by_id(user_id)
+        if user is None:
+            raise NotFoundException()
+        if user.is_admin:
+            raise AccessException()
+
+        return await self.repository.change_verified_status(user)
 
     async def delete_user(self, user: User) -> None:
+        return await self.repository.delete_user(user)
+
+    async def delete_user_by_id(self, user_id: int):
+        user = await self.get_user_by_id(user_id)
+        if user is None:
+            raise NotFoundException()
+        if user.is_admin:
+            raise AccessException()
+
         return await self.repository.delete_user(user)
