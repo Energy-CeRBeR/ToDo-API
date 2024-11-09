@@ -155,7 +155,7 @@ class UserService:
         if user.is_admin:
             raise AccessException()
 
-        return await self.repository.change_verified_status(user)
+        return await self.repository.change_active_status(user)
 
     async def delete_user(self, user: User) -> None:
         return await self.repository.delete_user(user)
