@@ -124,10 +124,10 @@ class UserService:
         return await self.repository.get_all_users()
 
     async def create_user(self, user: UserCreate) -> User:
-        if self.repository.get_user_by_email(user.email) is not None:
+        if await self.repository.get_user_by_email(user.email) is not None:
             raise EmailExistsException()
 
-        if self.repository.get_user_by_short_name(user.short_name) is not None:
+        if await self.repository.get_user_by_short_name(user.short_name) is not None:
             raise ShortNameExistsException()
 
         return await self.repository.create_user(user)

@@ -75,6 +75,7 @@ class UserRepository:
             query = select(User).where(User.short_name == short_name)
             result = await session.execute(query)
             user = result.scalars().first()
+
         return user
 
     async def change_admin_status(self, user: User) -> User:
