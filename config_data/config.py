@@ -12,15 +12,10 @@ class DataBase:
     DB_USER: str
     DB_PASS: str
     DB_NAME: str
-    DB_TEST_NAME: str
 
     @property
     def DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-
-    @property
-    def TEST_DATABASE_URL(self):
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_TEST_NAME}"
 
 
 @dataclass
@@ -34,6 +29,7 @@ class AuthJWT:
 
 @dataclass
 class VariablesData:
+    MODE: str
     MIN_ID: int
     MAX_ID: int
 
@@ -55,8 +51,7 @@ def load_config(path: str | None = None) -> Config:
             DB_PORT=env("DB_PORT"),
             DB_USER=env("DB_USER"),
             DB_PASS=env("DB_PASS"),
-            DB_NAME=env("DB_NAME"),
-            DB_TEST_NAME=env("DB_TEST_NAME")
+            DB_NAME=env("DB_NAME")
         ),
         authJWT=AuthJWT(
             private_key_path=AuthJWT.private_key_path,
@@ -64,6 +59,7 @@ def load_config(path: str | None = None) -> Config:
             algorithm=AuthJWT.algorithm
         ),
         variablesData=VariablesData(
+            MODE=env("MODE"),
             MIN_ID=int(env("MIN_ID")),
             MAX_ID=int(env("MAX_ID"))
         )
