@@ -54,3 +54,15 @@ class TaskService:
             raise AccessException()
 
         return await self.repository.delete_task(task)
+
+    async def uncompleted_all_user_tasks(self, user_id: int) -> None:
+        await self.repository.uncompleted_all_user_tasks(user_id)
+
+    async def uncompleted_all_tasks(self) -> None:
+        await self.repository.uncompleted_all_tasks()
+
+    async def delete_all_user_tasks(self, user_id: int) -> None:
+        await self.repository.delete_all_user_tasks(user_id)
+
+    async def delete_all_tasks(self) -> None:
+        await self.repository.delete_all_tasks()

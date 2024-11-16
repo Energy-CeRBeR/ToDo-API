@@ -65,3 +65,15 @@ class CategoryRepository:
             stmt = delete(Category).where(Category.id == category.id)
             await session.execute(stmt)
             await session.commit()
+
+    async def delete_all_user_categories(self, user_id: int) -> None:
+        async with async_session() as session:
+            stmt = delete(Category).where(Category.user_id == user_id)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_all_categories(self) -> None:
+        async with async_session() as session:
+            stmt = delete(Category)
+            await session.execute(stmt)
+            await session.commit()
