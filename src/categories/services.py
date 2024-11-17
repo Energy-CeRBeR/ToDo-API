@@ -37,3 +37,10 @@ class CategoryService:
             raise AccessException()
 
         return await self.repository.delete_category(category)
+
+
+    async def delete_all_user_categories(self, user_id: int) -> None:
+        await self.repository.delete_all_user_categories(user_id)
+
+    async def delete_all_categories(self) -> None:
+        await self.repository.delete_all_categories()

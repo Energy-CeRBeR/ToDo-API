@@ -11,6 +11,12 @@ app = FastAPI(
     title="ToDo-API"
 )
 
+
+@app.get("/ping")
+async def ping_pong():
+    return "pong"
+
+
 app.include_router(users_router)
 app.include_router(admin_router)
 app.include_router(categories_router)

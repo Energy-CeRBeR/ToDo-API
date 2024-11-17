@@ -29,6 +29,7 @@ class AuthJWT:
 
 @dataclass
 class VariablesData:
+    MODE: str
     MIN_ID: int
     MAX_ID: int
 
@@ -58,6 +59,7 @@ def load_config(path: str | None = None) -> Config:
             algorithm=AuthJWT.algorithm
         ),
         variablesData=VariablesData(
+            MODE=env("MODE"),
             MIN_ID=int(env("MIN_ID")),
             MAX_ID=int(env("MAX_ID"))
         )

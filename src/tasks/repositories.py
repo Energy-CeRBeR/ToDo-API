@@ -73,3 +73,27 @@ class TaskRepository:
             stmt = delete(Task).where(Task.id == task.id)
             await session.execute(stmt)
             await session.commit()
+
+    async def uncompleted_all_user_tasks(self, user_id: int) -> None:
+        async with async_session() as session:
+            stmt = update(Task).where(Task.user_id == user_id).values(completed=False)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def uncompleted_all_tasks(self) -> None:
+        async with async_session() as session:
+            stmt = update(Task).values(completed=False)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_all_user_tasks(self, user_id: int) -> None:
+        async with async_session() as session:
+            stmt = delete(Task).where(Task.user_id == user_id)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_all_tasks(self) -> None:
+        async with async_session() as session:
+            stmt = delete(Task)
+            await session.execute(stmt)
+            await session.commit()

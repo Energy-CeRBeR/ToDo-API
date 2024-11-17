@@ -176,3 +176,12 @@ class UserService:
             raise AccessException()
 
         return await self.repository.delete_user(user)
+
+    async def remove_user_admin_status(self, user_id: int) -> None:
+        return await self.repository.remove_user_admin_status(user_id)
+
+    async def remove_admin_status_for_all(self) -> None:
+        return await self.repository.remove_admin_status_for_all()
+
+    async def delete_all_users(self) -> None:
+        return await self.repository.delete_all_users()

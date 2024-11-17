@@ -124,3 +124,21 @@ class UserRepository:
             stmt = delete(User).where(User.id == user_id)
             await session.execute(stmt)
             await session.commit()
+
+    async def remove_user_admin_status(self, user_id: int) -> None:
+        async with async_session() as session:
+            stmt = update(User).where(User.id == user_id).values(is_admin=False)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def remove_admin_status_for_all(self) -> None:
+        async with async_session() as session:
+            stmt = update(User).values(is_admin=False)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_all_users(self) -> None:
+        async with async_session() as session:
+            stmt = delete(User)
+            await session.execute(stmt)
+            await session.commit()
