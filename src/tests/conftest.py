@@ -33,9 +33,6 @@ async def setup_db():
             raise FileNotFoundError("alembic.ini not found in project")
         project_root = project_root.parent
 
-    print(
-        "ВЫЗОВkjhjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj!!!")
-
     os.chdir(project_root)
     os.system("alembic upgrade head")
     await clear_tables()
@@ -43,21 +40,20 @@ async def setup_db():
 
 @pytest_asyncio.fixture(scope="session")
 async def client() -> AsyncGenerator[TestClient, None]:
-    print("HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     httpx_client = AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver")
     async with httpx_client as client:
         yield client
 
 
-@pytest_asyncio.fixture
-def users_data() -> List[Dict]:
+@pytest.fixture(scope="module")
+def get_test_users_data() -> List[Dict]:
     users = []
-    for i in range(1):
+    for i in range(2):
         user = {
             "name": f"TestName{i + 1}",
             "surname": f"TestSurname{i + 1}",
             "short_name": f"TestShort{i + 1}",
-            "email": f"testuser{i + 1}@example.com",
+            "email": f"test_user{i + 1}@example.com",
             "gender": "male" if i % 2 == 0 else "female",
             "password": f"TestPassword{i + 1}"
         }
