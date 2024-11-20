@@ -7,7 +7,8 @@ from config_data.config import Config, load_config
 config: Config = load_config(".env")
 DATABASE_URL = config.database.DATABASE_URL
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+# engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL)
 async_session = async_sessionmaker(engine)
 
 
