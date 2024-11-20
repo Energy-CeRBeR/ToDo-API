@@ -4,6 +4,7 @@ import pytest
 import pytest_asyncio
 
 from typing import AsyncGenerator, List, Dict, Generator
+from collections import defaultdict
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -14,6 +15,14 @@ from src.main import app
 from config_data.config import Config, load_config
 
 config: Config = load_config(".env")
+
+TEST_USERS_COUNT = 2
+TEST_CATEGORIES_COUNT = 2
+
+CREATE_USER_FLAG = True
+ACCESS_TOKENS = dict()
+CATEGORIES = defaultdict(list)
+CREATE_CATEGORIES_FLAG = True
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -49,15 +58,16 @@ async def client() -> AsyncGenerator[TestClient, None]:
 def get_test_users_data() -> List[Dict]:
     users = []
     for i in range(2):
-        user = {
-            "name": f"TestName{i + 1}",
-            "surname": f"TestSurname{i + 1}",
-            "short_name": f"TestShort{i + 1}",
-            "email": f"test_user{i + 1}@example.com",
-            "gender": "male" if i % 2 == 0 else "female",
-            "password": f"TestPassword{i + 1}"
-        }
-        users.append(user)
+        users.append(
+            {
+                "name": f"TestName{i + 1}",
+                "surname": f"TestSurname{i + 1}",
+                "short_name": f"TestShort{i + 1}",
+                "email": f"test_user{i + 1}@example.com",
+                "gender": "male" if i % 2 == 0 else "female",
+                "password": f"TestPassword{i + 1}"
+            }
+        )
 
     return users
 
@@ -65,23 +75,45 @@ def get_test_users_data() -> List[Dict]:
 @pytest.fixture(scope="module")
 def get_test_admin_users_data() -> List[Dict]:
     users = []
-    for i in range(2):
-        user = {
-            "name": f"admin_TestName{i + 1}",
-            "surname": f"admin_TestSurname{i + 1}",
-            "short_name": f"admin_TestShort{i + 1}",
-            "email": f"admin_test_user{i + 1}@example.com",
-            "gender": "admin_male" if i % 2 == 0 else "female",
-            "password": f"admin_TestPassword{i + 1}"
-        }
-        users.append(user)
+    for i in range(TEST_USERS_COUNT):
+        users.append(
+            {
+                "name": f"admin_TestName{i + 1}",
+                "surname": f"admin_TestSurname{i + 1}",
+                "short_name": f"admin_TestShort{i + 1}",
+                "email": f"admin_test_user{i + 1}@example.com",
+                "gender": "admin_male" if i % 2 == 0 else "female",
+                "password": f"admin_TestPassword{i + 1}"
+            }
+        )
 
     return users
 
 
+@pytest.fixture(scope="module")
+def get_test_categories_data() -> List[List[Dict]]:
+    categories = []
+    for i in range(TEST_USERS_COUNT):
+        colors = ["#F44336", "#4CAF50"]
+        user_categories = []
+        for j in range(TEST_CATEGORIES_COUNT):
+            user_categories.append(
+                {
+                    "name": f"{j + 1}_category_user_{i + 1}",
+                    "color": colors[j]
+                }
+            )
+        categories.append(user_categories)
+
+    return categories
+
+
 async def create_user_helper(client: AsyncClient, user_data: dict) -> None:
+    global CREATE_USER_FLAG
+
     response = await client.post("/user/register", json=user_data)
     assert response.status_code == 200 or response.status_code == 400
+    CREATE_USER_FLAG = False
 
 
 async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
@@ -104,5 +136,25 @@ async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
     return access_token
 
 
-CREATE_USER_FLAG = True
-ACCESS_TOKENS = dict()
+async def create_categories_helper(client: AsyncClient, category_data: dict, access_token: str) -> None:
+    global CREATE_CATEGORIES_FLAG
+
+    response = await client.post(
+        "/categories/",
+        json=category_data,
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert response.status_code == 200
+    CREATE_CATEGORIES_FLAG = False
+
+
+async def get_categories_helper(client: AsyncClient, access_token: str) -> List[dict]:
+    if access_token in CATEGORIES:
+        return CATEGORIES[access_token]
+
+    response = await client.get("/categories/", headers={"Authorization": f"Bearer {access_token}"})
+    assert response.status_code == 200
+
+    resp_dict = response.json()
+    for category in resp_dict:
+        CATEGORIES[access_token].append(category)

@@ -12,13 +12,12 @@ async def test_create_users(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
         response = await client.post("/user/register", json=user_data)
         assert response.status_code == 200
+        src.tests.conftest.CREATE_USER_FLAG = False
 
         resp_dict: dict = response.json()
         assert resp_dict.get("token_type", "") == "Bearer"
         assert len(resp_dict.get("access_token", "")) > 0
         assert len(resp_dict.get("refresh_token", "")) > 0
-
-    src.tests.conftest.CREATE_USER_FLAG = False
 
 
 @pytest.mark.asyncio
@@ -49,7 +48,6 @@ async def test_self_user(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
         if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            src.tests.conftest.CREATE_USER_FLAG = False
 
         access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
             if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
@@ -75,7 +73,6 @@ async def test_edit_user(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
         if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            src.tests.conftest.CREATE_USER_FLAG = False
 
         access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
             if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
@@ -116,7 +113,6 @@ async def test_delete_user(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
         if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            src.tests.conftest.CREATE_USER_FLAG = False
 
         access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
             if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
