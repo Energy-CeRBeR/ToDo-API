@@ -60,3 +60,49 @@ def get_test_users_data() -> List[Dict]:
         users.append(user)
 
     return users
+
+
+@pytest.fixture(scope="module")
+def get_test_admin_users_data() -> List[Dict]:
+    users = []
+    for i in range(2):
+        user = {
+            "name": f"admin_TestName{i + 1}",
+            "surname": f"admin_TestSurname{i + 1}",
+            "short_name": f"admin_TestShort{i + 1}",
+            "email": f"admin_test_user{i + 1}@example.com",
+            "gender": "admin_male" if i % 2 == 0 else "female",
+            "password": f"admin_TestPassword{i + 1}"
+        }
+        users.append(user)
+
+    return users
+
+
+async def create_user_helper(client: AsyncClient, user_data: dict) -> None:
+    response = await client.post("/user/register", json=user_data)
+    assert response.status_code == 200 or response.status_code == 400
+
+
+async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
+    global ACCESS_TOKENS
+
+    params = {
+        "email": user_data["email"],
+        "password": user_data["password"]
+    }
+
+    response = await client.post("/user/login", params=params)
+    assert response.status_code == 200
+
+    resp_dict: dict = response.json()
+    access_token = resp_dict.get("access_token", "")
+    assert len(access_token) > 0
+
+    ACCESS_TOKENS[user_data["email"]] = resp_dict["access_token"]
+
+    return access_token
+
+
+CREATE_USER_FLAG = True
+ACCESS_TOKENS = dict()

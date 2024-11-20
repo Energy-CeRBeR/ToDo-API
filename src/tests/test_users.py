@@ -1,43 +1,14 @@
 import pytest
 from httpx import AsyncClient
 
-from src.tests.conftest import client, get_test_users_data
+import src.tests.conftest
+from src.tests.conftest import client, get_test_users_data, create_user_helper, get_token_helper
+
 from src.users.schemas import SuccessfulResponse
-
-
-async def create_user_helper(client: AsyncClient, user_data: dict) -> None:
-    response = await client.post("/user/register", json=user_data)
-    assert response.status_code == 200 or response.status_code == 400
-
-
-async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
-    global ACCESS_TOKENS
-
-    params = {
-        "email": user_data["email"],
-        "password": user_data["password"]
-    }
-
-    response = await client.post("/user/login", params=params)
-    assert response.status_code == 200
-
-    resp_dict: dict = response.json()
-    access_token = resp_dict.get("access_token", "")
-    assert len(access_token) > 0
-
-    ACCESS_TOKENS[user_data["email"]] = resp_dict["access_token"]
-
-    return access_token
-
-
-CREATE_USER_FLAG = True
-ACCESS_TOKENS = dict()
 
 
 @pytest.mark.asyncio
 async def test_create_users(client: AsyncClient, get_test_users_data):
-    global CREATE_USER_FLAG
-
     for user_data in get_test_users_data:
         response = await client.post("/user/register", json=user_data)
         assert response.status_code == 200
@@ -47,17 +18,15 @@ async def test_create_users(client: AsyncClient, get_test_users_data):
         assert len(resp_dict.get("access_token", "")) > 0
         assert len(resp_dict.get("refresh_token", "")) > 0
 
-    CREATE_USER_FLAG = False
+    src.tests.conftest.CREATE_USER_FLAG = False
 
 
 @pytest.mark.asyncio
 async def test_login_users(client: AsyncClient, get_test_users_data):
-    global CREATE_USER_FLAG, ACCESS_TOKENS
-
     for user_data in get_test_users_data:
-        if CREATE_USER_FLAG:
+        if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            CREATE_USER_FLAG = False
+            src.tests.conftest.CREATE_USER_FLAG = False
 
         params = {
             "email": user_data["email"],
@@ -72,20 +41,18 @@ async def test_login_users(client: AsyncClient, get_test_users_data):
         assert len(resp_dict.get("access_token", "")) > 0
         assert len(resp_dict.get("refresh_token", "")) > 0
 
-        ACCESS_TOKENS[user_data["email"]] = resp_dict["access_token"]
+        src.tests.conftest.ACCESS_TOKENS[user_data["email"]] = resp_dict["access_token"]
 
 
 @pytest.mark.asyncio
 async def test_self_user(client: AsyncClient, get_test_users_data):
-    global CREATE_USER_FLAG, ACCESS_TOKENS
-
     for user_data in get_test_users_data:
-        if CREATE_USER_FLAG:
+        if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            CREATE_USER_FLAG = False
+            src.tests.conftest.CREATE_USER_FLAG = False
 
-        access_token = ACCESS_TOKENS[user_data["email"]] if user_data["email"] in ACCESS_TOKENS \
-            else await get_token_helper(client, user_data)
+        access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
+            if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
         response = await client.get("/user/self", headers={"Authorization": f"Bearer {access_token}"})
         assert response.status_code == 200
 
@@ -105,15 +72,15 @@ async def test_self_user(client: AsyncClient, get_test_users_data):
 
 @pytest.mark.asyncio
 async def test_edit_user(client: AsyncClient, get_test_users_data):
-    global CREATE_USER_FLAG, ACCESS_TOKENS
-
     for user_data in get_test_users_data:
-        if CREATE_USER_FLAG:
+        if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            CREATE_USER_FLAG = False
+            src.tests.conftest.CREATE_USER_FLAG = False
 
-        access_token = ACCESS_TOKENS[user_data["email"]] if user_data["email"] in ACCESS_TOKENS \
-            else await get_token_helper(client, user_data)
+        access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
+            if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
+        response = await client.get("/user/self", headers={"Authorization": f"Bearer {access_token}"})
+        assert response.status_code == 200
 
         base_user_data = {
             "name": user_data["name"],
@@ -148,15 +115,15 @@ async def test_edit_user(client: AsyncClient, get_test_users_data):
 
 @pytest.mark.asyncio
 async def test_delete_user(client: AsyncClient, get_test_users_data):
-    global CREATE_USER_FLAG, ACCESS_TOKENS
-
     for user_data in get_test_users_data:
-        if CREATE_USER_FLAG:
+        if src.tests.conftest.CREATE_USER_FLAG:
             await create_user_helper(client, user_data)
-            CREATE_USER_FLAG = False
+            src.tests.conftest.CREATE_USER_FLAG = False
 
-        access_token = ACCESS_TOKENS[user_data["email"]] if user_data["email"] in ACCESS_TOKENS \
-            else await get_token_helper(client, user_data)
+        access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
+            if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
+        response = await client.get("/user/self", headers={"Authorization": f"Bearer {access_token}"})
+        assert response.status_code == 200
 
         response = await client.delete("/user/", headers={"Authorization": f"Bearer {access_token}"})
         assert response.status_code == 200
