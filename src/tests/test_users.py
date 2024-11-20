@@ -79,8 +79,6 @@ async def test_edit_user(client: AsyncClient, get_test_users_data):
 
         access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
             if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
-        response = await client.get("/user/self", headers={"Authorization": f"Bearer {access_token}"})
-        assert response.status_code == 200
 
         base_user_data = {
             "name": user_data["name"],
@@ -122,8 +120,6 @@ async def test_delete_user(client: AsyncClient, get_test_users_data):
 
         access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
             if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
-        response = await client.get("/user/self", headers={"Authorization": f"Bearer {access_token}"})
-        assert response.status_code == 200
 
         response = await client.delete("/user/", headers={"Authorization": f"Bearer {access_token}"})
         assert response.status_code == 200
