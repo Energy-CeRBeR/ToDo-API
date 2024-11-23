@@ -71,15 +71,25 @@ async def test_get_category(client: AsyncClient, get_test_users_data, get_test_c
         users_with_categories[access_token] = await get_categories_helper(client, access_token)
 
         for category in users_with_categories[access_token]:
-            response = await client.post(
+            response = await client.get(
                 f'/categories/{category["id"]}',
                 headers={"Authorization": f"Bearer {access_token}"}
             )
             assert response.status_code == 200
 
             resp_dict: dict = response.json()
+            assert resp_dict == category
 
-    for key, value in users_with_categories.items():
-        print(key)
-        print(value)
-        print()
+    access_tokens = list(users_with_categories.keys())
+    for i in range(len(access_tokens)):
+        for j in range(i + 1, len(access_tokens)):
+            access_token1 = access_tokens[i]
+            access_token2 = access_tokens[j]
+
+            for category2 in users_with_categories[access_token2]:
+                response = await client.get(
+                    f'/categories/{category2["id"]}',
+                    headers={"Authorization": f"Bearer {access_token1}"}
+                )
+                assert response.status_code == 403
+

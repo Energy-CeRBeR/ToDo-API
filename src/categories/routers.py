@@ -24,7 +24,7 @@ async def get_category(
         current_user: Annotated[User, Depends(UserService().get_current_user)],  # noqa
         category_id: int
 ) -> CategoryResponse:
-    category = await CategoryService().get_category_by_id(category_id)
+    category = await CategoryService().get_user_category_by_id(category_id, current_user.id)
     return CategoryResponse(**category.to_dict())
 
 

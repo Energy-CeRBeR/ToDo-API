@@ -28,6 +28,16 @@ class CategoryService:
 
         return category
 
+    async def get_user_category_by_id(self, category_id: int, user_id: int) -> Category:
+        category = await self.repository.get_category_by_id(category_id)
+        if category is None:
+            raise NotFoundException()
+
+        if category.user_id != user_id:
+            raise AccessException()
+
+        return category
+
     async def get_all_user_categories(self, user_id: int) -> List[Category]:
         return await self.repository.get_all_user_categories(user_id)
 
@@ -37,7 +47,6 @@ class CategoryService:
             raise AccessException()
 
         return await self.repository.delete_category(category)
-
 
     async def delete_all_user_categories(self, user_id: int) -> None:
         await self.repository.delete_all_user_categories(user_id)
