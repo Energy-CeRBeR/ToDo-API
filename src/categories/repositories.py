@@ -1,7 +1,7 @@
 import random
 from typing import Optional, List
 
-from sqlalchemy import insert, select, delete, update
+from sqlalchemy import insert, select, delete, update, and_
 
 from config_data.config import Config, load_config
 from src.database import async_session
