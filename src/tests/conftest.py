@@ -93,7 +93,7 @@ def get_test_admin_users_data() -> List[Dict]:
 @pytest.fixture(scope="module")
 def get_test_categories_data() -> List[List[Dict]]:
     categories = []
-    for i in range(TEST_USERS_COUNT):
+    for i in range(TEST_CATEGORIES_COUNT):
         colors = ["#F44336", "#4CAF50"]
         user_categories = []
         for j in range(TEST_CATEGORIES_COUNT):
@@ -149,9 +149,10 @@ async def create_categories_helper(client: AsyncClient, category_data: dict, acc
 
 
 async def get_categories_helper(client: AsyncClient, access_token: str) -> List[dict]:
-    if access_token in CATEGORIES:
+    if access_token in CATEGORIES and len(CATEGORIES[access_token]) == TEST_CATEGORIES_COUNT + 1:
         return CATEGORIES[access_token]
 
+    CATEGORIES[access_token] = []
     response = await client.get("/categories/", headers={"Authorization": f"Bearer {access_token}"})
     assert response.status_code == 200
 
