@@ -158,3 +158,5 @@ async def get_categories_helper(client: AsyncClient, access_token: str) -> List[
     resp_dict = response.json()
     for category in resp_dict:
         CATEGORIES[access_token].append(category)
+
+    return CATEGORIES[access_token]
