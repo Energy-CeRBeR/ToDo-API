@@ -28,6 +28,7 @@ class TaskResponse(BaseModel):
     id: int
     name: str
     description: str
+    priority: Priority
     completed: bool
     user_id: int
     category_id: int

@@ -33,11 +33,11 @@ async def test_create_categories(client: AsyncClient, get_test_users_data, get_t
             assert response.status_code == 200
 
             resp_dict: dict = response.json()
-            TEST_DATA[user_data["email"]]["categories"].append(resp_dict)
-
-            assert resp_dict["name"] == category_data["name"]
-            assert resp_dict["color"] == category_data["color"]
             assert resp_dict["user_id"] == current_user["id"]
+            for key in category_data:
+                assert category_data[key] == resp_dict[key]
+
+            TEST_DATA[user_data["email"]]["categories"].append(resp_dict)
 
 
 @pytest.mark.asyncio

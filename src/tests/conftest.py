@@ -113,7 +113,9 @@ def get_test_categories_data() -> List[List[Dict]]:
 @pytest.fixture(scope="module")
 def get_test_tasks_data() -> List[List[Dict]]:
     tasks = []
-    for i in range(TEST_USERS_COUNT):
+
+    for i, email in enumerate(TEST_DATA):
+        user_data = TEST_DATA[email]
         user_tasks = []
         count = 0
         for j in range(TEST_CATEGORIES_COUNT):
@@ -123,11 +125,12 @@ def get_test_tasks_data() -> List[List[Dict]]:
                     {
                         "name": f"{count}_Task_user_{i + 1}",
                         "description": f"{count}_task_description_user_{i + 1}",
-                        "priority": 1,
+                        "priority": 1 + (i + j + t) % 3,
+                        "category_id": user_data["categories"][j]["id"],
                         "date": "2025-01-01"
                     }
                 )
-            tasks.append(user_tasks)
+        tasks.append(user_tasks)
 
     return tasks
 
