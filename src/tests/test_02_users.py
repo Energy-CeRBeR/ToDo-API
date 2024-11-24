@@ -1,8 +1,9 @@
 import pytest
 from httpx import AsyncClient
+from copy import deepcopy
 
-import src.tests.conftest
-from src.tests.conftest import client, get_test_users_data, create_user_helper, get_token_helper
+from src.tests.conftest import client, get_test_users_data, create_user_helper, get_token_helper, TEST_DATA, \
+    TESTS_DATA_TEMPLATE
 
 from src.users.schemas import SuccessfulResponse
 
@@ -18,13 +19,13 @@ async def test_create_users(client: AsyncClient, get_test_users_data):
         assert len(resp_dict.get("access_token", "")) > 0
         assert len(resp_dict.get("refresh_token", "")) > 0
 
-    src.tests.conftest.CREATE_USER_FLAG = False
+        TEST_DATA[user_data["email"]] = deepcopy(TESTS_DATA_TEMPLATE)
 
 
 @pytest.mark.asyncio
 async def test_login_users(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
-        if src.tests.conftest.CREATE_USER_FLAG:
+        if user_data["email"] not in TEST_DATA:
             await create_user_helper(client, user_data)
 
         params = {
@@ -40,17 +41,17 @@ async def test_login_users(client: AsyncClient, get_test_users_data):
         assert len(resp_dict.get("access_token", "")) > 0
         assert len(resp_dict.get("refresh_token", "")) > 0
 
-        src.tests.conftest.ACCESS_TOKENS[user_data["email"]] = resp_dict["access_token"]
+        TEST_DATA[user_data["email"]]["access_token"] = resp_dict["access_token"]
 
 
 @pytest.mark.asyncio
 async def test_self_user(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
-        if src.tests.conftest.CREATE_USER_FLAG:
+        if user_data["email"] not in TEST_DATA:
             await create_user_helper(client, user_data)
 
-        access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
-            if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
+        access_token = TEST_DATA[user_data["email"]]["access_token"] if user_data["email"] in TEST_DATA \
+            else await get_token_helper(client, user_data)
         response = await client.get("/user/self", headers={"Authorization": f"Bearer {access_token}"})
         assert response.status_code == 200
 
@@ -71,18 +72,17 @@ async def test_self_user(client: AsyncClient, get_test_users_data):
 @pytest.mark.asyncio
 async def test_edit_user(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
-        if src.tests.conftest.CREATE_USER_FLAG:
+        if user_data["email"] not in TEST_DATA:
             await create_user_helper(client, user_data)
 
-        access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
-            if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
+        access_token = TEST_DATA[user_data["email"]]["access_token"] if user_data["email"] in TEST_DATA \
+            else await get_token_helper(client, user_data)
 
         base_user_data = {
             "name": user_data["name"],
             "surname": user_data["surname"],
             "gender": user_data["gender"]
         }
-
         upd_user_data = {
             "name": user_data["name"] + "_edited",
             "surname": user_data["surname"] + "_edited",
@@ -111,11 +111,11 @@ async def test_edit_user(client: AsyncClient, get_test_users_data):
 @pytest.mark.asyncio
 async def test_delete_user(client: AsyncClient, get_test_users_data):
     for user_data in get_test_users_data:
-        if src.tests.conftest.CREATE_USER_FLAG:
+        if user_data["email"] not in TEST_DATA:
             await create_user_helper(client, user_data)
 
-        access_token = src.tests.conftest.ACCESS_TOKENS[user_data["email"]] \
-            if user_data["email"] in src.tests.conftest.ACCESS_TOKENS else await get_token_helper(client, user_data)
+        access_token = TEST_DATA[user_data["email"]]["access_token"] if user_data["email"] in TEST_DATA \
+            else await get_token_helper(client, user_data)
 
         response = await client.delete("/user/", headers={"Authorization": f"Bearer {access_token}"})
         assert response.status_code == 200
