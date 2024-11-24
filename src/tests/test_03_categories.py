@@ -179,7 +179,7 @@ async def test_delete_category(client: AsyncClient, get_test_users_data, get_tes
                 assert response.status_code == 200
                 assert response.json() == SuccessfulResponse().dict()
 
-        TEST_DATA[user_data["email"]]["categories"].clear()
+        TEST_DATA[user_data["email"]]["categories"] = []
         for category_data in get_test_categories_data[i]:
             await create_categories_helper(client, category_data, access_token)
         await get_categories_helper(client, user_data)

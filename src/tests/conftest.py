@@ -17,7 +17,7 @@ config: Config = load_config(".env")
 
 TEST_USERS_COUNT = 2
 TEST_CATEGORIES_COUNT = 2
-TEST_TASKS_COUNT = 2
+TEST_TASKS_COUNT_IN_CATEGORY = 2
 
 TEST_DATA = dict()
 TESTS_DATA_TEMPLATE = {
@@ -119,7 +119,7 @@ def get_test_tasks_data() -> List[List[Dict]]:
         user_tasks = []
         count = 0
         for j in range(TEST_CATEGORIES_COUNT):
-            for t in range(TEST_TASKS_COUNT):
+            for t in range(TEST_TASKS_COUNT_IN_CATEGORY):
                 count += 1
                 user_tasks.append(
                     {
@@ -185,3 +185,21 @@ async def get_categories_helper(client: AsyncClient, user_data: TESTS_DATA_TEMPL
         TEST_DATA[user_data["email"]]["categories"].append(category)
 
     return TEST_DATA[user_data["email"]]["categories"]
+
+
+async def get_tasks_helper(client: AsyncClient, user_data: TESTS_DATA_TEMPLATE) -> List[dict]:
+    if len(TEST_DATA[user_data["email"]]["tasks"]) == TEST_CATEGORIES_COUNT * TEST_TASKS_COUNT_IN_CATEGORY:
+        return TEST_DATA[user_data["email"]]["tasks"]
+
+    TEST_DATA[user_data["email"]]["tasks"] = []
+    response = await client.get(
+        "/tasks/",
+        headers={"Authorization": f'Bearer {TEST_DATA[user_data["email"]]["access_token"]}'}
+    )
+    assert response.status_code == 200
+
+    resp_dict = response.json()
+    for task in resp_dict:
+        TEST_DATA[user_data["email"]]["tasks"].append(task)
+
+    return TEST_DATA[user_data["email"]]["tasks"]

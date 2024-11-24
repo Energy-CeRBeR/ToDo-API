@@ -31,10 +31,12 @@ class TaskService:
 
         return await self.repository.edit_task(task, task_edit)
 
-    async def get_task_by_id(self, task_id: int) -> Task:
+    async def get_task_by_id(self, task_id: int, user_id: int) -> Task:
         task = await self.repository.get_task_by_id(task_id)
         if task is None:
             raise TaskNotFoundException()
+        if task.user_id != user_id:
+            raise AccessException()
 
         return task
 

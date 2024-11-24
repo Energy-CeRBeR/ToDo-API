@@ -22,7 +22,7 @@ async def get_task(
         current_user: Annotated[User, Depends(UserService().get_current_user)],  # noqa
         task_id: int
 ) -> TaskResponse:
-    task = await TaskService().get_task_by_id(task_id)
+    task = await TaskService().get_task_by_id(task_id, current_user.id)
     return TaskResponse(**task.to_dict())
 
 
