@@ -4,9 +4,8 @@ import pytest
 import pytest_asyncio
 
 from typing import AsyncGenerator, List, Dict, Generator
-from collections import defaultdict
 from pathlib import Path
-
+from copy import deepcopy
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
@@ -20,10 +19,12 @@ TEST_USERS_COUNT = 2
 TEST_CATEGORIES_COUNT = 2
 TEST_TASKS_COUNT = 2
 
-CREATE_USER_FLAG = True
-ACCESS_TOKENS = dict()
-CATEGORIES = defaultdict(list)
-CREATE_CATEGORIES_FLAG = True
+TEST_DATA = dict()
+TESTS_DATA_TEMPLATE = {
+    "access_token": "",
+    "categories": [],
+    "tasks": []
+}
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -132,16 +133,22 @@ def get_test_tasks_data() -> List[List[Dict]]:
 
 
 async def create_user_helper(client: AsyncClient, user_data: dict) -> None:
-    global CREATE_USER_FLAG
-
     response = await client.post("/user/register", json=user_data)
     assert response.status_code == 200 or response.status_code == 400
-    CREATE_USER_FLAG = False
+
+    TEST_DATA[user_data["email"]] = deepcopy(TESTS_DATA_TEMPLATE)
+
+
+async def create_categories_helper(client: AsyncClient, category_data: dict, access_token: str) -> None:
+    response = await client.post(
+        "/categories/",
+        json=category_data,
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert response.status_code == 200
 
 
 async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
-    global ACCESS_TOKENS
-
     params = {
         "email": user_data["email"],
         "password": user_data["password"]
@@ -154,33 +161,24 @@ async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
     access_token = resp_dict.get("access_token", "")
     assert len(access_token) > 0
 
-    ACCESS_TOKENS[user_data["email"]] = resp_dict["access_token"]
+    TEST_DATA[user_data["email"]]["access_token"] = resp_dict["access_token"]
 
     return access_token
 
 
-async def create_categories_helper(client: AsyncClient, category_data: dict, access_token: str) -> None:
-    global CREATE_CATEGORIES_FLAG
+async def get_categories_helper(client: AsyncClient, user_data: TESTS_DATA_TEMPLATE) -> List[dict]:
+    if len(TEST_DATA[user_data["email"]]["categories"]) == TEST_CATEGORIES_COUNT + 1:
+        return TEST_DATA[user_data["email"]]["categories"]
 
-    response = await client.post(
+    TEST_DATA[user_data["email"]]["categories"] = []
+    response = await client.get(
         "/categories/",
-        json=category_data,
-        headers={"Authorization": f"Bearer {access_token}"}
+        headers={"Authorization": f'Bearer {TEST_DATA[user_data["email"]]["access_token"]}'}
     )
-    assert response.status_code == 200
-    CREATE_CATEGORIES_FLAG = False
-
-
-async def get_categories_helper(client: AsyncClient, access_token: str) -> List[dict]:
-    if access_token in CATEGORIES and len(CATEGORIES[access_token]) == TEST_CATEGORIES_COUNT + 1:
-        return CATEGORIES[access_token]
-
-    CATEGORIES[access_token] = []
-    response = await client.get("/categories/", headers={"Authorization": f"Bearer {access_token}"})
     assert response.status_code == 200
 
     resp_dict = response.json()
     for category in resp_dict:
-        CATEGORIES[access_token].append(category)
+        TEST_DATA[user_data["email"]]["categories"].append(category)
 
-    return CATEGORIES[access_token]
+    return TEST_DATA[user_data["email"]]["categories"]
