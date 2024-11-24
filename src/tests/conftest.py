@@ -18,6 +18,7 @@ config: Config = load_config(".env")
 
 TEST_USERS_COUNT = 2
 TEST_CATEGORIES_COUNT = 2
+TEST_TASKS_COUNT = 2
 
 CREATE_USER_FLAG = True
 ACCESS_TOKENS = dict()
@@ -93,7 +94,7 @@ def get_test_admin_users_data() -> List[Dict]:
 @pytest.fixture(scope="module")
 def get_test_categories_data() -> List[List[Dict]]:
     categories = []
-    for i in range(TEST_CATEGORIES_COUNT):
+    for i in range(TEST_USERS_COUNT):
         colors = ["#F44336", "#4CAF50"]
         user_categories = []
         for j in range(TEST_CATEGORIES_COUNT):
@@ -106,6 +107,28 @@ def get_test_categories_data() -> List[List[Dict]]:
         categories.append(user_categories)
 
     return categories
+
+
+@pytest.fixture(scope="module")
+def get_test_tasks_data() -> List[List[Dict]]:
+    tasks = []
+    for i in range(TEST_USERS_COUNT):
+        user_tasks = []
+        count = 0
+        for j in range(TEST_CATEGORIES_COUNT):
+            for t in range(TEST_TASKS_COUNT):
+                count += 1
+                user_tasks.append(
+                    {
+                        "name": f"{count}_Task_user_{i + 1}",
+                        "description": f"{count}_task_description_user_{i + 1}",
+                        "priority": 1,
+                        "date": "2025-01-01"
+                    }
+                )
+            tasks.append(user_tasks)
+
+    return tasks
 
 
 async def create_user_helper(client: AsyncClient, user_data: dict) -> None:
