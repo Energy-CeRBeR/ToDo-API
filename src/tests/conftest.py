@@ -151,6 +151,15 @@ async def create_categories_helper(client: AsyncClient, category_data: dict, acc
     assert response.status_code == 200
 
 
+async def create_tasks_helper(client: AsyncClient, task_data: dict, access_token: str) -> None:
+    response = await client.post(
+        "/tasks/",
+        json=task_data,
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert response.status_code == 200
+
+
 async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
     params = {
         "email": user_data["email"],

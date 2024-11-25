@@ -25,7 +25,7 @@ class TaskService:
         if category.user_id != user_id:
             raise AccessException()
 
-        task = await self.get_task_by_id(task_id)
+        task = await self.get_task_by_id(task_id, user_id)
         if task.user_id != user_id:
             raise AccessException()
 
@@ -51,7 +51,7 @@ class TaskService:
         return await self.repository.change_task_status(task)
 
     async def delete_task(self, task_id: int, user_id: int) -> None:
-        task = await self.get_task_by_id(task_id)
+        task = await self.get_task_by_id(task_id, user_id)
         if task.user_id != user_id:
             raise AccessException()
 
