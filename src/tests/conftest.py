@@ -11,7 +11,9 @@ from httpx import AsyncClient, ASGITransport
 
 from src.database import clear_tables
 from src.main import app
+from src.users.repositories import UserRepository
 from config_data.config import Config, load_config
+from src.users.schemas import UserCreate
 
 config: Config = load_config(".env")
 
@@ -25,6 +27,19 @@ TESTS_DATA_TEMPLATE = {
     "categories": [],
     "tasks": []
 }
+
+TEST_ADMIN_DATA = {
+    "admin": {
+        "data": dict(),
+        "access_token": ""
+    },
+    "user": {
+        "data": dict(),
+        "access_token": ""
+    }
+}
+
+USERS: List[Dict] = list()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -68,24 +83,6 @@ def get_test_users_data() -> List[Dict]:
                 "email": f"test_user{i + 1}@example.com",
                 "gender": "male" if i % 2 == 0 else "female",
                 "password": f"TestPassword{i + 1}"
-            }
-        )
-
-    return users
-
-
-@pytest.fixture(scope="module")
-def get_test_admin_users_data() -> List[Dict]:
-    users = []
-    for i in range(TEST_USERS_COUNT):
-        users.append(
-            {
-                "name": f"admin_TestName{i + 1}",
-                "surname": f"admin_TestSurname{i + 1}",
-                "short_name": f"admin_TestShort{i + 1}",
-                "email": f"admin_test_user{i + 1}@example.com",
-                "gender": "admin_male" if i % 2 == 0 else "female",
-                "password": f"admin_TestPassword{i + 1}"
             }
         )
 
@@ -158,6 +155,61 @@ async def create_tasks_helper(client: AsyncClient, task_data: dict, access_token
         headers={"Authorization": f"Bearer {access_token}"}
     )
     assert response.status_code == 200
+
+
+async def create_admin_and_base_users_helper(client: AsyncClient) -> None:
+    admin_user = {
+        "name": f"test_admin",
+        "surname": f"test_admin_surname",
+        "short_name": f"test_admin_shortname",
+        "email": f"admin_test_user@example.com",
+        "gender": "male",
+        "password": f"admin_TestPassword"
+    }
+
+    base_user = {
+        "name": f"test_base",
+        "surname": f"test_base_surname",
+        "short_name": f"test_base_shortname",
+        "email": f"admin_base_user@example.com",
+        "gender": "female",
+        "password": f"base_TestPassword"
+    }
+
+    if not TEST_ADMIN_DATA["admin"]["data"] or not TEST_ADMIN_DATA["user"]["data"]:
+        if not TEST_ADMIN_DATA["admin"]["access_token"]:
+            admin = await UserRepository().set_admin_status(
+                await UserRepository().create_user(UserCreate(**admin_user))
+            )
+            TEST_ADMIN_DATA["admin"]["data"] = admin.to_dict()
+
+            params = {
+                "email": admin_user["email"],
+                "password": admin_user["password"]
+            }
+
+            response = await client.post("/user/login", params=params)
+            assert response.status_code == 200
+
+            resp_dict: dict = response.json()
+            access_token = resp_dict.get("access_token", "")
+            assert len(access_token) > 0
+
+            TEST_ADMIN_DATA["admin"]["access_token"] = access_token
+
+        if not TEST_ADMIN_DATA["user"]["data"]:
+            user = await UserRepository().create_user(UserCreate(**base_user))
+            TEST_ADMIN_DATA["user"]["data"] = user.to_dict()
+
+
+async def get_all_users_helper() -> List[Dict]:
+    global USERS
+
+    if USERS:
+        return USERS
+
+    USERS = list(map(lambda x: x.to_dict(), await UserRepository().get_all_users()))
+    return USERS
 
 
 async def get_token_helper(client: AsyncClient, user_data: dict) -> str:
