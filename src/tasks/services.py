@@ -25,16 +25,18 @@ class TaskService:
         if category.user_id != user_id:
             raise AccessException()
 
-        task = await self.get_task_by_id(task_id)
+        task = await self.get_task_by_id(task_id, user_id)
         if task.user_id != user_id:
             raise AccessException()
 
         return await self.repository.edit_task(task, task_edit)
 
-    async def get_task_by_id(self, task_id: int) -> Task:
+    async def get_task_by_id(self, task_id: int, user_id: int) -> Task:
         task = await self.repository.get_task_by_id(task_id)
         if task is None:
             raise TaskNotFoundException()
+        if task.user_id != user_id:
+            raise AccessException()
 
         return task
 
@@ -42,14 +44,14 @@ class TaskService:
         return await self.repository.get_all_user_tasks(user_id)
 
     async def change_task_status(self, task_id: int, user_id: int) -> Task:
-        task = await self.get_task_by_id(task_id)
+        task = await self.get_task_by_id(task_id, user_id)
         if task.user_id != user_id:
             raise AccessException()
 
         return await self.repository.change_task_status(task)
 
     async def delete_task(self, task_id: int, user_id: int) -> None:
-        task = await self.get_task_by_id(task_id)
+        task = await self.get_task_by_id(task_id, user_id)
         if task.user_id != user_id:
             raise AccessException()
 

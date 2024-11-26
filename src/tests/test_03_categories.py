@@ -33,11 +33,11 @@ async def test_create_categories(client: AsyncClient, get_test_users_data, get_t
             assert response.status_code == 200
 
             resp_dict: dict = response.json()
-            TEST_DATA[user_data["email"]]["categories"].append(resp_dict)
-
-            assert resp_dict["name"] == category_data["name"]
-            assert resp_dict["color"] == category_data["color"]
             assert resp_dict["user_id"] == current_user["id"]
+            for key in category_data:
+                assert category_data[key] == resp_dict[key]
+
+            TEST_DATA[user_data["email"]]["categories"].append(resp_dict)
 
 
 @pytest.mark.asyncio
@@ -179,7 +179,7 @@ async def test_delete_category(client: AsyncClient, get_test_users_data, get_tes
                 assert response.status_code == 200
                 assert response.json() == SuccessfulResponse().dict()
 
-        TEST_DATA[user_data["email"]]["categories"].clear()
+        TEST_DATA[user_data["email"]]["categories"] = []
         for category_data in get_test_categories_data[i]:
             await create_categories_helper(client, category_data, access_token)
         await get_categories_helper(client, user_data)

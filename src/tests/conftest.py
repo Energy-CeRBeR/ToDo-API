@@ -17,7 +17,7 @@ config: Config = load_config(".env")
 
 TEST_USERS_COUNT = 2
 TEST_CATEGORIES_COUNT = 2
-TEST_TASKS_COUNT = 2
+TEST_TASKS_COUNT_IN_CATEGORY = 2
 
 TEST_DATA = dict()
 TESTS_DATA_TEMPLATE = {
@@ -113,21 +113,24 @@ def get_test_categories_data() -> List[List[Dict]]:
 @pytest.fixture(scope="module")
 def get_test_tasks_data() -> List[List[Dict]]:
     tasks = []
-    for i in range(TEST_USERS_COUNT):
+
+    for i, email in enumerate(TEST_DATA):
+        user_data = TEST_DATA[email]
         user_tasks = []
         count = 0
         for j in range(TEST_CATEGORIES_COUNT):
-            for t in range(TEST_TASKS_COUNT):
+            for t in range(TEST_TASKS_COUNT_IN_CATEGORY):
                 count += 1
                 user_tasks.append(
                     {
                         "name": f"{count}_Task_user_{i + 1}",
                         "description": f"{count}_task_description_user_{i + 1}",
-                        "priority": 1,
+                        "priority": 1 + (i + j + t) % 3,
+                        "category_id": user_data["categories"][j]["id"],
                         "date": "2025-01-01"
                     }
                 )
-            tasks.append(user_tasks)
+        tasks.append(user_tasks)
 
     return tasks
 
@@ -143,6 +146,15 @@ async def create_categories_helper(client: AsyncClient, category_data: dict, acc
     response = await client.post(
         "/categories/",
         json=category_data,
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert response.status_code == 200
+
+
+async def create_tasks_helper(client: AsyncClient, task_data: dict, access_token: str) -> None:
+    response = await client.post(
+        "/tasks/",
+        json=task_data,
         headers={"Authorization": f"Bearer {access_token}"}
     )
     assert response.status_code == 200
@@ -182,3 +194,21 @@ async def get_categories_helper(client: AsyncClient, user_data: TESTS_DATA_TEMPL
         TEST_DATA[user_data["email"]]["categories"].append(category)
 
     return TEST_DATA[user_data["email"]]["categories"]
+
+
+async def get_tasks_helper(client: AsyncClient, user_data: TESTS_DATA_TEMPLATE) -> List[dict]:
+    if len(TEST_DATA[user_data["email"]]["tasks"]) == TEST_CATEGORIES_COUNT * TEST_TASKS_COUNT_IN_CATEGORY:
+        return TEST_DATA[user_data["email"]]["tasks"]
+
+    TEST_DATA[user_data["email"]]["tasks"] = []
+    response = await client.get(
+        "/tasks/",
+        headers={"Authorization": f'Bearer {TEST_DATA[user_data["email"]]["access_token"]}'}
+    )
+    assert response.status_code == 200
+
+    resp_dict = response.json()
+    for task in resp_dict:
+        TEST_DATA[user_data["email"]]["tasks"].append(task)
+
+    return TEST_DATA[user_data["email"]]["tasks"]
