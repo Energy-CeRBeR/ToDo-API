@@ -44,7 +44,7 @@ class TaskService:
         return await self.repository.get_all_user_tasks(user_id)
 
     async def change_task_status(self, task_id: int, user_id: int) -> Task:
-        task = await self.get_task_by_id(task_id)
+        task = await self.get_task_by_id(task_id, user_id)
         if task.user_id != user_id:
             raise AccessException()
 
