@@ -119,6 +119,15 @@ class UserRepository:
             await session.execute(stmt)
             await session.commit()
 
+    async def set_admin_status(self, user: User) -> User:
+        async with async_session() as session:
+            stmt = update(User).where(User.id == user.id).values(is_admin=True)
+            await session.execute(stmt)
+            await session.commit()
+
+            user: User = await self.get_user_by_id(user.id)
+            return user
+
     async def delete_user_by_id(self, user_id: int) -> None:
         async with async_session() as session:
             stmt = delete(User).where(User.id == user_id)
