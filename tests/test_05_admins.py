@@ -1,8 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
-from src.tests.conftest import client, get_test_users_data, create_user_helper, TEST_DATA, TEST_ADMIN_DATA, \
-    create_admin_and_base_users_helper, get_all_users_helper
+from tests.conftest import create_user_helper, TEST_DATA, TEST_ADMIN_DATA, create_admin_and_base_users_helper, \
+    get_all_users_helper
 from src.users.repositories import UserRepository
 
 
