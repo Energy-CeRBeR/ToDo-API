@@ -1,9 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
-from src.tests.conftest import client, get_test_users_data, get_test_categories_data, create_user_helper, TEST_DATA, \
-    get_token_helper, create_categories_helper, get_categories_helper
-
+from tests.conftest import create_user_helper, TEST_DATA, get_token_helper, create_categories_helper, \
+    get_categories_helper
 from src.categories.schemas import SuccessfulResponse
 
 

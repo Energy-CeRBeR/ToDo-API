@@ -2,9 +2,7 @@ import pytest
 from httpx import AsyncClient
 from copy import deepcopy
 
-from src.tests.conftest import client, get_test_users_data, create_user_helper, get_token_helper, TEST_DATA, \
-    TESTS_DATA_TEMPLATE
-
+from tests.conftest import create_user_helper, get_token_helper, TEST_DATA, TESTS_DATA_TEMPLATE
 from src.users.schemas import SuccessfulResponse
 
 

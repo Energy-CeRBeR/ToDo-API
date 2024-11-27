@@ -2,8 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from src.tasks.schemas import SuccessfulResponse
-from src.tests.conftest import client, get_test_users_data, create_user_helper, get_token_helper, TEST_DATA, \
-    get_test_tasks_data, get_tasks_helper, create_tasks_helper
+from tests.conftest import create_user_helper, get_token_helper, TEST_DATA, get_tasks_helper, create_tasks_helper
 
 
 @pytest.mark.asyncio
