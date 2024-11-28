@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  api:
+    build: .
+    environment:
+      - MODE=PROD
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=1234
+      - DB_NAME=ToDo
+      - MIN_ID=10000000
+      - MAX_ID=99999999
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: ToDo
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ToDo" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped

@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
 from src.database import clear_tables
-from src.main import app
+from main import app
 from src.users.repositories import UserRepository
 from config_data.config import Config, load_config
 from src.users.schemas import UserCreate
