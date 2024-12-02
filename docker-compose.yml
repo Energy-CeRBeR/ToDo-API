@@ -16,6 +16,8 @@ services:
       - postgres
     ports:
       - "8000:8000"
+    networks:
+      - backend-network
 
   postgres:
     image: postgres:latest
@@ -31,3 +33,10 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
