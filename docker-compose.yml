@@ -40,3 +40,7 @@ services:
 
 networks:
   backend-network:
+
+
+volumes:
+  pgdata:
