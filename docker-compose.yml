@@ -10,7 +10,7 @@ services:
       - "443:443"
     volumes:
       - ./traefik/traefik.yml:/traefik.yml:ro
-      - ./traefik/certs:/certs:ro
+      - ./traefik/acme.json:/acme.json 
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - backend-network
@@ -28,14 +28,12 @@ services:
       - MAX_ID=99999999
     depends_on:
       - postgres
-    ports:
-      - "8000:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`energy-cerber.ru`)"
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls.certresolver=letsencrypt"
-      - "traefik.http.services.app.loadbalancer.server.port=80"
+      - "traefik.http.services.app.loadbalancer.server.port=8000"
     networks:
       - backend-network
 
