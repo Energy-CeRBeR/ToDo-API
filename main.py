@@ -19,7 +19,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    openapi_prefix="/api/v1",
     title="ToDo-API",
     lifespan=lifespan
 )
