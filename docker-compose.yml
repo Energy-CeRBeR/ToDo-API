@@ -22,7 +22,7 @@ services:
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
-      - DB_PASS=postgres
+      - DB_PASS=MADRID_postgres_MADRID
       - DB_NAME=ToDo
       - MIN_ID=10000000
       - MAX_ID=99999999
@@ -41,7 +41,7 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: MADRID_postgres_MADRID
       POSTGRES_DB: ToDo
     ports:
       - "5433:5432"
