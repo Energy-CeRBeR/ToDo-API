@@ -1,6 +1,4 @@
-from datetime import datetime
 from typing import List
-
 from pydantic import BaseModel
 
 from src.tasks.schemas import TaskResponse
@@ -24,6 +22,4 @@ class CategoryResponse(BaseModel):
     id: int
     name: str
     color: str
-    user_id: int
-    created_at: datetime
     tasks: List[TaskResponse]
