@@ -10,9 +10,11 @@ from utils.auth_settings import validate_password, decode_jwt, encode_jwt
 
 from src.users.models import User
 from src.users.repositories import UserRepository
-from src.users.schemas import UserCreate, TokenData, UserEdit
+from src.users.schemas import UserCreate, TokenData, UserEdit, UserLogin
 from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException, AccessException, \
     EmailExistsException, ShortNameExistsException
+
+from src.categories.models import Category
 
 http_bearer = HTTPBearer()
 
@@ -65,17 +67,17 @@ class UserService:
             expire_timedelta=timedelta(days=auth_config.refresh_token_expire_days)
         )
 
-    async def authenticate_user(self, email: str, password: str) -> Optional[User]:
-        user = await self.repository.get_user_by_email(email)
+    async def authenticate_user(self, auth_data: UserLogin) -> Optional[User]:
+        user = await self.repository.get_user_by_email(auth_data.email)
         if not user:
             raise CredentialException()
-        if not validate_password(password, user.password_hash):
+        if not validate_password(auth_data.password, user.password_hash):
             raise CredentialException()
 
         return user
 
     @staticmethod
-    async def validate_admin_user(user) -> User:
+    async def validate_admin_user(user: User) -> User:
         if not user.is_admin:
             raise AccessException()
         return user
@@ -103,6 +105,11 @@ class UserService:
             raise CredentialException()
 
         return user
+
+    async def set_base_category_id(self, user: User, category: Category) -> User:
+        if category.user_id != user.id:
+            raise AccessException()
+        return await self.repository.set_base_category_id(user, category.id)
 
     async def get_current_user_for_refresh(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
         return await self.validate_user(expected_token_type=REFRESH_TOKEN_TYPE, token=token.credentials)

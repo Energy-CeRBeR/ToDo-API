@@ -183,12 +183,12 @@ async def create_admin_and_base_users_helper(client: AsyncClient) -> None:
             )
             TEST_ADMIN_DATA["admin"]["data"] = admin.to_dict()
 
-            params = {
+            auth_data = {
                 "email": admin_user["email"],
                 "password": admin_user["password"]
             }
 
-            response = await client.post("/user/login", params=params)
+            response = await client.post("/user/login", json=auth_data)
             assert response.status_code == 200
 
             resp_dict: dict = response.json()

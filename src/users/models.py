@@ -12,11 +12,6 @@ from src.tasks.models import Task
 from src.categories.models import Category
 
 
-class Roles(Enum):
-    user = "user"
-    admin = "admin"
-
-
 class Gender(Enum):
     male = "male"
     female = "female"
@@ -31,7 +26,7 @@ class User(Base):
     short_name: Mapped[str] = mapped_column(unique=True)
     email: Mapped[str] = mapped_column(unique=True)
     gender: Mapped[Gender] = mapped_column(default=Gender.male)
-    role: Mapped[Roles] = mapped_column(default=Roles.user)
+    base_category_id: Mapped[int] = mapped_column(default=-1)
     is_admin: Mapped[bool] = mapped_column(default=False)
     is_verified: Mapped[bool] = mapped_column(default=False)
     is_active: Mapped[bool] = mapped_column(default=True)
@@ -51,7 +46,7 @@ class User(Base):
             "short_name": self.short_name,
             "email": self.email,
             "gender": self.gender.value,
-            "role": self.role.value,
+            "base_category_id": int,
             "is_admin": self.is_admin,
             "is_verified": self.is_verified,
             "is_active": self.is_active,

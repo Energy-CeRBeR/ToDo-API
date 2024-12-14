@@ -1,6 +1,5 @@
-from typing import Annotated, List
-
 from fastapi import APIRouter, Depends
+from typing import Annotated, List
 
 from src.categories.schemas import CategoryResponse, CategoryCreate, CategoryEdit, SuccessfulResponse
 from src.categories.services import CategoryService
@@ -19,12 +18,20 @@ async def get_all_categories(
     return list(map(lambda x: CategoryResponse(**x.to_dict()), categories))
 
 
+@router.get("/no_base", response_model=List[CategoryResponse])
+async def get_all_categories_without_base(
+        current_user: Annotated[User, Depends(UserService().get_current_user)]
+) -> List[CategoryResponse]:
+    categories = await CategoryService().get_all_categories_without_base(current_user)
+    return list(map(lambda x: CategoryResponse(**x.to_dict()), categories))
+
+
 @router.get("/{category_id}", response_model=CategoryResponse)
 async def get_category(
         current_user: Annotated[User, Depends(UserService().get_current_user)],  # noqa
         category_id: int
 ) -> CategoryResponse:
-    category = await CategoryService().get_user_category_by_id(category_id, current_user.id)
+    category = await CategoryService().get_user_category_by_id(category_id, current_user)
     return CategoryResponse(**category.to_dict())
 
 
@@ -43,7 +50,7 @@ async def edit_category(
         category_id: int,
         edited_category: CategoryEdit
 ) -> CategoryResponse:
-    upd_category = await CategoryService().edit_category(edited_category, category_id, current_user.id)
+    upd_category = await CategoryService().edit_category(edited_category, category_id, current_user)
     return CategoryResponse(**upd_category.to_dict())
 
 
@@ -52,5 +59,5 @@ async def delete_category(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         category_id: int
 ) -> SuccessfulResponse:
-    await CategoryService().delete_category(category_id, current_user.id)
+    await CategoryService().delete_category(category_id, current_user)
     return SuccessfulResponse()

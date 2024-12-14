@@ -1,6 +1,5 @@
 import random
 from typing import Optional, List
-
 from sqlalchemy import insert, select, delete, update, and_
 
 from config_data.config import Config, load_config
@@ -41,6 +40,14 @@ class CategoryRepository:
             category = result.scalars().first()
 
             return category
+
+    async def get_all_categories_without_base(self, user_id: int, base_category_id: int) -> List[Category]:
+        async with async_session() as session:
+            stmt = select(Category).where(and_(Category.user_id == user_id, Category.id != base_category_id))
+            result = await session.execute(stmt)
+            categories = result.scalars().all()
+
+        return categories
 
     async def get_all_user_categories(self, user_id: int) -> List[Category]:
         async with async_session() as session:
