@@ -32,6 +32,11 @@ class UserCreate(BaseModel):
     password: str
 
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
 class UserEdit(BaseModel):
     name: str
     surname: str

@@ -26,12 +26,12 @@ async def test_login_users(client: AsyncClient, get_test_users_data):
         if user_data["email"] not in TEST_DATA:
             await create_user_helper(client, user_data)
 
-        params = {
+        auth_data = {
             "email": user_data["email"],
             "password": user_data["password"]
         }
 
-        response = await client.post("/user/login", params=params)
+        response = await client.post("/user/login", json=auth_data)
         assert response.status_code == 200
 
         resp_dict: dict = response.json()
