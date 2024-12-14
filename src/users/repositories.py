@@ -55,6 +55,15 @@ class UserRepository:
         upd_user = await self.get_user_by_id(user.id)
         return upd_user
 
+    async def set_base_category_id(self, user: User, category_id: int) -> User:
+        async with async_session() as session:
+            stmt = update(User).where(User.id == user.id).values(base_category_id=category_id)
+            await session.execute(stmt)
+            await session.commit()
+
+        upd_user = await self.get_user_by_id(user.id)
+        return upd_user
+
     async def get_user_by_email(self, email: str) -> Optional[User]:
         async with async_session() as session:
             query = select(User).where(User.email == email)

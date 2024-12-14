@@ -8,7 +8,6 @@ from src.users.services import UserService
 
 from src.categories.services import CategoryService
 from src.categories.schemas import CategoryCreate
-from src.categories.models import Colors
 
 router = APIRouter(tags=["user"], prefix="/user")
 
@@ -17,8 +16,9 @@ router = APIRouter(tags=["user"], prefix="/user")
 async def register(user_create: UserCreate) -> Token:
     user = await UserService().create_user(user_create)
 
-    category = CategoryCreate(name="base_category", color=Colors.WHITE)
-    await CategoryService().create_category(category, user.id)
+    category = CategoryCreate(name="Без категории", color="#FFFFFF")
+    base_category = await CategoryService().create_category(category, user.id)
+    await UserService().set_base_category_id(user, base_category)
 
     access_token = UserService().create_access_token(user)
     refresh_token = UserService().create_refresh_token(user)

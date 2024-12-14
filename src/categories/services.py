@@ -5,7 +5,6 @@ from src.categories.repositories import CategoryRepository
 from src.categories.schemas import CategoryCreate, CategoryEdit
 
 from src.categories.exceptions import NotFoundException
-from src.users.exceptions import AccessException
 
 
 class CategoryService:
@@ -17,7 +16,9 @@ class CategoryService:
     async def edit_category(self, category_edit: CategoryEdit, category_id: int, user_id: int) -> Category:
         category = await self.get_category_by_id(category_id)
         if category.user_id != user_id:
-            raise AccessException()
+            raise NotFoundException()
+        if category.name == "Базовая категория":
+            raise NotFoundException()
 
         return await self.repository.edit_category(category, category_edit)
 
@@ -34,7 +35,7 @@ class CategoryService:
             raise NotFoundException()
 
         if category.user_id != user_id:
-            raise AccessException()
+            raise NotFoundException()
 
         return category
 
@@ -44,7 +45,7 @@ class CategoryService:
     async def delete_category(self, category_id: int, user_id: int) -> None:
         category = await self.get_category_by_id(category_id)
         if category.user_id != user_id:
-            raise AccessException()
+            raise NotFoundException()
 
         return await self.repository.delete_category(category)
 

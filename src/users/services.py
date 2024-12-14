@@ -14,6 +14,8 @@ from src.users.schemas import UserCreate, TokenData, UserEdit, UserLogin
 from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException, AccessException, \
     EmailExistsException, ShortNameExistsException
 
+from src.categories.models import Category
+
 http_bearer = HTTPBearer()
 
 settings: Config = load_config(".env")
@@ -103,6 +105,11 @@ class UserService:
             raise CredentialException()
 
         return user
+
+    async def set_base_category_id(self, user: User, category: Category) -> User:
+        if category.user_id != user.id:
+            raise AccessException()
+        return await self.repository.set_base_category_id(user, category.id)
 
     async def get_current_user_for_refresh(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
         return await self.validate_user(expected_token_type=REFRESH_TOKEN_TYPE, token=token.credentials)

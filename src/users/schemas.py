@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from src.categories.schemas import CategoryResponse
 from src.tasks.schemas import TaskResponse
 
-from src.users.models import Gender, Roles
+from src.users.models import Gender
 
 
 class SuccessfulResponse(BaseModel):
@@ -50,10 +50,6 @@ class UserResponse(BaseModel):
     short_name: str
     email: str
     gender: Gender
-    role: Roles
-    is_admin: bool
-    is_verified: bool
-    is_active: bool
     created_at: datetime
     tasks: List[TaskResponse]
     categories: List[CategoryResponse]
