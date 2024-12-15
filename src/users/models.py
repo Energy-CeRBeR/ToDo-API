@@ -3,7 +3,7 @@ import datetime
 from enum import Enum
 from typing import Dict, Any, List
 
-from sqlalchemy import func
+from sqlalchemy import func, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -21,17 +21,17 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column()
-    surname: Mapped[str] = mapped_column()
-    short_name: Mapped[str] = mapped_column(unique=True)
-    email: Mapped[str] = mapped_column(unique=True)
-    gender: Mapped[Gender] = mapped_column(default=Gender.male)
-    base_category_id: Mapped[int] = mapped_column(default=-1)
-    is_admin: Mapped[bool] = mapped_column(default=False)
-    is_verified: Mapped[bool] = mapped_column(default=False)
-    is_active: Mapped[bool] = mapped_column(default=True)
-    password_hash: Mapped[bytes] = mapped_column()
-    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    surname: Mapped[str] = mapped_column(String(50), nullable=False)
+    short_name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    gender: Mapped[Gender] = mapped_column(default=Gender.male, nullable=False)
+    base_category_id: Mapped[int] = mapped_column(default=-1, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(default=False, nullable=False)
+    is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    password_hash: Mapped[bytes] = mapped_column(nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now(), nullable=False)
 
     categories: Mapped[List["Category"]] = relationship(back_populates="user", uselist=True, lazy="selectin",
                                                         cascade="all, delete-orphan")

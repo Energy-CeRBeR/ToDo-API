@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import List
-
-from pydantic import BaseModel
+from typing import List, Annotated
+from pydantic import BaseModel, Field
 
 from src.categories.schemas import CategoryResponse
 from src.tasks.schemas import TaskResponse
@@ -24,32 +23,31 @@ class Token(BaseModel):
 
 
 class UserCreate(BaseModel):
-    name: str
-    surname: str
-    short_name: str
-    email: str
+    name: Annotated[str, Field(min_length=2, max_length=50)]
+    surname: Annotated[str, Field(min_length=2, max_length=50)]
+    short_name: Annotated[str, Field(min_length=3, max_length=20)]
+    email: Annotated[str, Field(min_length=6, max_length=50)]
     gender: Gender
-    password: str
+    password: Annotated[str, Field(min_length=8, max_length=25)]
 
 
 class UserLogin(BaseModel):
-    email: str
-    password: str
+    email: Annotated[str, Field(min_length=6, max_length=50)]
+    password: Annotated[str, Field(min_length=8, max_length=25)]
 
 
 class UserEdit(BaseModel):
-    name: str
-    surname: str
+    name: Annotated[str, Field(min_length=2, max_length=50)]
+    surname: Annotated[str, Field(min_length=2, max_length=50)]
     gender: Gender
 
 
 class UserResponse(BaseModel):
     id: int
-    name: str
-    surname: str
-    short_name: str
-    email: str
+    name: Annotated[str, Field(min_length=2, max_length=50)]
+    surname: Annotated[str, Field(min_length=2, max_length=50)]
+    short_name: Annotated[str, Field(min_length=3, max_length=20)]
+    email: Annotated[str, Field(min_length=6, max_length=50)]
     gender: Gender
-    created_at: datetime
     tasks: List[TaskResponse]
     categories: List[CategoryResponse]
