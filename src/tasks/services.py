@@ -8,35 +8,24 @@ from src.users.exceptions import AccessException
 from src.tasks.exceptions import NotFoundException as TaskNotFoundException
 
 from src.categories.services import CategoryService
+from src.users.models import User
 
 
 class TaskService:
     repository = TaskRepository()
 
-    async def create_task(self, task_create: TaskCreate, user_id: int) -> Task:
-        category = await CategoryService().get_category_by_id(task_create.category_id)
-        if category.user_id != user_id:
-            raise AccessException()
+    async def create_task(self, task_create: TaskCreate, user: User) -> Task:
+        await CategoryService().get_category_by_id(task_create.category_id, user)
+        return await self.repository.create_task(task_create, user.id)
 
-        return await self.repository.create_task(task_create, user_id)
-
-    async def edit_task(self, task_edit: TaskEdit, task_id: int, user_id: int) -> Task:
-        category = await CategoryService().get_category_by_id(task_edit.category_id)
-        if category.user_id != user_id:
-            raise AccessException()
-
-        task = await self.get_task_by_id(task_id, user_id)
-        if task.user_id != user_id:
-            raise AccessException()
-
-        return await self.repository.edit_task(task, task_edit)
+    async def edit_task(self, task_edit: TaskEdit, task_id: int, user: User) -> Task:
+        await CategoryService().get_category_by_id(task_edit.category_id, user)
+        return await self.repository.edit_task(await self.get_task_by_id(task_id, user.id), task_edit)
 
     async def get_task_by_id(self, task_id: int, user_id: int) -> Task:
         task = await self.repository.get_task_by_id(task_id)
-        if task is None:
+        if task is None or task.user_id != user_id:
             raise TaskNotFoundException()
-        if task.user_id != user_id:
-            raise AccessException()
 
         return task
 
@@ -44,18 +33,10 @@ class TaskService:
         return await self.repository.get_all_user_tasks(user_id)
 
     async def change_task_status(self, task_id: int, user_id: int) -> Task:
-        task = await self.get_task_by_id(task_id, user_id)
-        if task.user_id != user_id:
-            raise AccessException()
-
-        return await self.repository.change_task_status(task)
+        return await self.repository.change_task_status(await self.get_task_by_id(task_id, user_id))
 
     async def delete_task(self, task_id: int, user_id: int) -> None:
-        task = await self.get_task_by_id(task_id, user_id)
-        if task.user_id != user_id:
-            raise AccessException()
-
-        return await self.repository.delete_task(task)
+        return await self.repository.delete_task(await self.get_task_by_id(task_id, user_id))
 
     async def uncompleted_all_user_tasks(self, user_id: int) -> None:
         await self.repository.uncompleted_all_user_tasks(user_id)
