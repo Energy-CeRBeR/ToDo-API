@@ -1,7 +1,7 @@
 import datetime
 
 from typing import Dict, Any, List
-from sqlalchemy import func, ForeignKey
+from sqlalchemy import func, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -11,10 +11,10 @@ class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(nullable=False)
-    color: Mapped[str] = mapped_column(default="#FFFFFF")
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    color: Mapped[str] = mapped_column(default="#FFFFFF", nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now(), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="categories", uselist=False)
     tasks: Mapped[List["Task"]] = relationship(back_populates="category", uselist=True, lazy="selectin",

@@ -1,5 +1,5 @@
-from typing import List
-from pydantic import BaseModel
+from typing import List, Annotated
+from pydantic import BaseModel, Field
 
 from src.tasks.schemas import TaskResponse
 
@@ -9,17 +9,17 @@ class SuccessfulResponse(BaseModel):
 
 
 class CategoryCreate(BaseModel):
-    name: str
+    name: Annotated[str, Field(min_length=1, max_length=100)]
     color: str
 
 
 class CategoryEdit(BaseModel):
-    name: str
+    name: Annotated[str, Field(min_length=1, max_length=100)]
     color: str
 
 
 class CategoryResponse(BaseModel):
     id: int
-    name: str
+    name: Annotated[str, Field(min_length=1, max_length=100)]
     color: str
     tasks: List[TaskResponse]
