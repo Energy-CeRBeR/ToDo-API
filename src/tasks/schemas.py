@@ -1,5 +1,6 @@
 import datetime
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, Field
 
 from src.tasks.models import Priority
 
@@ -9,16 +10,16 @@ class SuccessfulResponse(BaseModel):
 
 
 class TaskCreate(BaseModel):
-    name: str
-    description: str
+    name: Annotated[str, Field(min_length=1, max_length=100)]
+    description: Annotated[str, Field(max_length=100)]
     priority: Priority
     category_id: int
     date: datetime.date
 
 
 class TaskEdit(BaseModel):
-    name: str
-    description: str
+    name: Annotated[str, Field(min_length=1, max_length=100)]
+    description: Annotated[str, Field(max_length=100)]
     priority: Priority
     category_id: int
     date: datetime.date
@@ -26,10 +27,9 @@ class TaskEdit(BaseModel):
 
 class TaskResponse(BaseModel):
     id: int
-    name: str
-    description: str
+    name: Annotated[str, Field(min_length=1, max_length=100)]
+    description: Annotated[str, Field(max_length=100)]
     priority: Priority
     completed: bool
-    user_id: int
     category_id: int
     date: datetime.date

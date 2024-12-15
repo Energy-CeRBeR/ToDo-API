@@ -1,10 +1,8 @@
-from datetime import datetime
 from typing import List, Annotated
 from pydantic import BaseModel, Field
 
 from src.categories.schemas import CategoryResponse
 from src.tasks.schemas import TaskResponse
-
 from src.users.models import Gender
 
 
