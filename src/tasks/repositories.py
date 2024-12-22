@@ -68,11 +68,28 @@ class TaskRepository:
             task: Task = await self.get_task_by_id(task.id)
             return task
 
+    async def set_base_category_for_task(self, task: Task, base_category_id: int):
+        async with async_session() as session:
+            stmt = update(Task).where(Task.id == task.id).values(category_id=base_category_id)
+            await session.execute(stmt)
+            await session.commit()
+
+            task: Task = await self.get_task_by_id(task.id)
+            return task
+
     async def delete_task(self, task: Task) -> None:
         async with async_session() as session:
             stmt = delete(Task).where(Task.id == task.id)
             await session.execute(stmt)
             await session.commit()
+
+    async def get_all_tasks_from_category(self, category_id: int) -> List[Task]:
+        async with async_session() as session:
+            stmt = select(Task).where(Task.category_id == category_id)
+            result = await session.execute(stmt)
+            tasks = result.scalars().all()
+
+        return tasks
 
     async def uncompleted_all_user_tasks(self, user_id: int) -> None:
         async with async_session() as session:

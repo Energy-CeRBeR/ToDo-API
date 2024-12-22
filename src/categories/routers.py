@@ -4,6 +4,7 @@ from typing import Annotated, List
 from src.categories.schemas import CategoryResponse, CategoryCreate, CategoryEdit, SuccessfulResponse
 from src.categories.services import CategoryService
 
+from src.tasks.services import TaskService
 from src.users.models import User
 from src.users.services import UserService
 
@@ -59,5 +60,11 @@ async def delete_category(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         category_id: int
 ) -> SuccessfulResponse:
-    await CategoryService().delete_category(category_id, current_user)
+    category = await CategoryService().get_category_by_id(category_id, current_user)
+    tasks_from_category = await TaskService().get_all_tasks_from_category(category, current_user)
+
+    for task in tasks_from_category:
+        await TaskService().set_base_category_for_task(task, current_user)
+
+    await CategoryService().delete_category(category, current_user)
     return SuccessfulResponse()

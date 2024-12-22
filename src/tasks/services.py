@@ -1,10 +1,10 @@
 from typing import List
 
+from src.categories.exceptions import NotFoundException as CategoryNotFoundException
+from src.categories.models import Category
 from src.tasks.models import Task
 from src.tasks.repositories import TaskRepository
 from src.tasks.schemas import TaskCreate, TaskEdit
-
-from src.users.exceptions import AccessException
 from src.tasks.exceptions import NotFoundException as TaskNotFoundException
 
 from src.categories.services import CategoryService
@@ -31,6 +31,18 @@ class TaskService:
 
     async def get_all_user_tasks(self, user_id: int) -> List[Task]:
         return await self.repository.get_all_user_tasks(user_id)
+
+    async def get_all_tasks_from_category(self, category: Category, user: User) -> List[Task]:
+        if category is None or category.user_id != user.id:
+            raise CategoryNotFoundException()
+
+        return await self.repository.get_all_tasks_from_category(category.id)
+
+    async def set_base_category_for_task(self, task: Task, user: User):
+        if task.user_id != user.id:
+            raise TaskNotFoundException()
+
+        return await self.repository.set_base_category_for_task(task, user.base_category_id)
 
     async def change_task_status(self, task_id: int, user_id: int) -> Task:
         return await self.repository.change_task_status(await self.get_task_by_id(task_id, user_id))

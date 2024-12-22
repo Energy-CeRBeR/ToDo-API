@@ -37,9 +37,8 @@ class CategoryService:
     async def get_all_user_categories(self, user_id: int) -> List[Category]:
         return await self.repository.get_all_user_categories(user_id)
 
-    async def delete_category(self, category_id: int, user: User) -> None:
-        category = await self.get_category_by_id(category_id, user)
-        if category.id == user.base_category_id:
+    async def delete_category(self, category: Category, user: User) -> None:
+        if category is None or category.user_id != user.id or category.id == user.base_category_id:
             raise NotFoundException()
 
         return await self.repository.delete_category(category)
