@@ -9,17 +9,17 @@ class SuccessfulResponse(BaseModel):
 
 
 class CategoryCreate(BaseModel):
-    name: Annotated[str, Field(min_length=1, max_length=100)]
+    name: Annotated[str, Field(min_length=1, max_length=50)]
     color: str
 
 
 class CategoryEdit(BaseModel):
-    name: Annotated[str, Field(min_length=1, max_length=100)]
+    name: Annotated[str, Field(min_length=1, max_length=50)]
     color: str
 
 
 class CategoryResponse(BaseModel):
     id: int
-    name: Annotated[str, Field(min_length=1, max_length=100)]
+    name: Annotated[str, Field(min_length=1, max_length=50)]
     color: str
     tasks: List[TaskResponse]

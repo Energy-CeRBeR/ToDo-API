@@ -12,7 +12,7 @@ from src.tasks.routers import router as tasks_router
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # noqa
     os.system("alembic upgrade head")
 
     yield
@@ -33,7 +33,7 @@ origins = [
 ]
 
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware,  # noqa
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
