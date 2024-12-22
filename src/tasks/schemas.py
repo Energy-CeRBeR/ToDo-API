@@ -10,16 +10,16 @@ class SuccessfulResponse(BaseModel):
 
 
 class TaskCreate(BaseModel):
-    name: Annotated[str, Field(min_length=1, max_length=100)]
-    description: Annotated[str, Field(max_length=100)]
+    name: Annotated[str, Field(min_length=1, max_length=50)]
+    description: Annotated[str, Field(max_length=500)]
     priority: Priority
     category_id: int
     date: datetime.date
 
 
 class TaskEdit(BaseModel):
-    name: Annotated[str, Field(min_length=1, max_length=100)]
-    description: Annotated[str, Field(max_length=100)]
+    name: Annotated[str, Field(min_length=1, max_length=50)]
+    description: Annotated[str, Field(max_length=500)]
     priority: Priority
     category_id: int
     date: datetime.date
@@ -27,8 +27,8 @@ class TaskEdit(BaseModel):
 
 class TaskResponse(BaseModel):
     id: int
-    name: Annotated[str, Field(min_length=1, max_length=100)]
-    description: Annotated[str, Field(max_length=100)]
+    name: Annotated[str, Field(min_length=1, max_length=50)]
+    description: Annotated[str, Field(max_length=500)]
     priority: Priority
     completed: bool
     category_id: int
