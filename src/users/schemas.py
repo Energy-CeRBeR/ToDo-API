@@ -20,6 +20,11 @@ class Token(BaseModel):
     token_type: str = "Bearer"
 
 
+class RefreshToken(BaseModel):
+    access_token: str
+    token_type: str = "Bearer"
+
+
 class UserCreate(BaseModel):
     name: Annotated[str, Field(min_length=2, max_length=50)]
     surname: Annotated[str, Field(min_length=2, max_length=50)]

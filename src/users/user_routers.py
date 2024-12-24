@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from src.users.models import User
-from src.users.schemas import UserCreate, Token, UserResponse, SuccessfulResponse, UserEdit
+from src.users.schemas import UserCreate, Token, RefreshToken, UserResponse, SuccessfulResponse, UserEdit
 from src.users.services import UserService
 
 from src.categories.services import CategoryService
@@ -32,12 +32,13 @@ async def authenticate_user_jwt(user: User = Depends(UserService().authenticate_
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
-@router.post("/refresh", response_model=Token, response_model_exclude_none=True)
+@router.post("/refresh", response_model=RefreshToken)
 async def refresh_jwt(
-        user: Annotated[User, Depends(UserService().get_current_user_for_refresh)]
-) -> Token:
+        user: Annotated[User, Depends(
+            UserService().get_current_user_for_refresh)]
+) -> RefreshToken:
     access_token = UserService().create_access_token(user)
-    return Token(access_token=access_token)
+    return RefreshToken(access_token=access_token)
 
 
 @router.post("/edit_password", response_model=SuccessfulResponse)
