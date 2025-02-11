@@ -1,3 +1,5 @@
+import smtplib
+
 import jwt
 
 from datetime import timedelta
@@ -7,12 +9,14 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from config_data.config import Config, load_config
 from utils.auth_settings import validate_password, decode_jwt, encode_jwt
+from utils.email_sender import send_verification_code
 
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.schemas import UserCreate, TokenData, UserEdit, UserLogin
 from src.users.exceptions import CredentialException, TokenTypeException, NotFoundException, AccessException, \
-    EmailExistsException, ShortNameExistsException
+    EmailExistsException, ShortNameExistsException, IncorrectEmailAddressException, EmailSenderException, \
+    IncorrectVerifyCodeException
 
 from src.categories.models import Category
 
@@ -44,6 +48,35 @@ class UserService:
             expire_timedelta=expire_timedelta
         )
         return token
+
+    async def get_verify_code(self, email: str) -> None:
+        potential_user = await self.repository.get_user_by_email(email)
+        if potential_user is not None:
+            raise EmailExistsException()
+
+        try:
+            code = send_verification_code(email)
+            potential_code = await self.repository.get_verify_code_by_email(email)
+            if potential_code is not None:
+                await self.repository.update_verify_code(email, code)
+            else:
+                await self.repository.create_verify_code(email, code)
+
+        except smtplib.SMTPRecipientsRefused as e:
+            raise IncorrectEmailAddressException()
+        except Exception as e:
+            raise EmailSenderException()
+
+    async def check_verify_code(self, email: str, code: int) -> bool:
+        verify_code = await self.repository.get_verify_code_by_email(email)
+        if verify_code is None:
+            raise IncorrectEmailAddressException()
+
+        if verify_code.code != code:
+            raise IncorrectVerifyCodeException()
+
+        await self.repository.delete_verify_code_by_id(verify_code.id)
+        return True
 
     def create_access_token(self, user: User) -> str:
         jwt_payload = {

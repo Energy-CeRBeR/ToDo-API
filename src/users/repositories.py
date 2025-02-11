@@ -3,11 +3,11 @@ from typing import Optional, List
 
 from sqlalchemy import insert, select, delete, update
 
+from src.database import async_session
 from config_data.config import Config, load_config
 from utils import auth_settings
-from src.database import async_session
 
-from src.users.models import User
+from src.users.models import User, VerifyCode
 from src.users.schemas import UserCreate, UserEdit
 
 settings: Config = load_config(".env")
@@ -21,6 +21,32 @@ class UserRepository:
             unique_id = random.randint(global_vars.MIN_ID, global_vars.MAX_ID)
 
         return unique_id
+
+    async def create_verify_code(self, email: str, code: int) -> None:
+        async with async_session() as session:
+            stmt = insert(VerifyCode).values(email=email, code=code)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def update_verify_code(self, email: str, code: int) -> None:
+        async with async_session() as session:
+            stmt = update(VerifyCode).where(VerifyCode.email == email).values(code=code)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def get_verify_code_by_email(self, email: str) -> VerifyCode:
+        async with async_session() as session:
+            query = select(VerifyCode).where(VerifyCode.email == email)
+            result = await session.execute(query)
+            verify_code = result.scalars().first()
+
+            return verify_code
+
+    async def delete_verify_code_by_id(self, code_id: int) -> None:
+        async with async_session() as session:
+            stmt = delete(VerifyCode).where(VerifyCode.id == code_id)
+            await session.execute(stmt)
+            await session.commit()
 
     async def create_user(self, new_user: UserCreate) -> User:
         password = new_user.password
