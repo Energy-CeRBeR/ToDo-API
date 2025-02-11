@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from src.users.models import User
-from src.users.schemas import UserCreate, Token, RefreshToken, UserResponse, SuccessfulResponse, UserEdit
+from src.users.schemas import UserCreate, Token, RefreshToken, UserResponse, SuccessfulResponse, UserEdit, \
+    SuccessfulGetVerifyCodeResponse, SuccessfulValidation
 from src.users.services import UserService
 
 from src.categories.services import CategoryService
@@ -23,6 +24,18 @@ async def register(user_create: UserCreate) -> Token:
     access_token = UserService().create_access_token(user)
     refresh_token = UserService().create_refresh_token(user)
     return Token(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.get("/register/verify_code", response_model=SuccessfulGetVerifyCodeResponse)
+async def get_verify_code_by_email(email: str) -> SuccessfulGetVerifyCodeResponse:
+    await UserService().get_verify_code(email)
+    return SuccessfulGetVerifyCodeResponse()
+
+
+@router.post("/register/verify_code", response_model=SuccessfulValidation)
+async def check_code_from_email(email: str, code: int) -> SuccessfulValidation:
+    if await UserService().check_verify_code(email, code):
+        return SuccessfulValidation()
 
 
 @router.post("/login", response_model=Token)

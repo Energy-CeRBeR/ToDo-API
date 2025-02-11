@@ -70,8 +70,8 @@ def load_config(path: str | None = None) -> Config:
         email_sender=EmailSender(
             EMAIL_NAME=env("EMAIL_NAME"),
             EMAIL_PASS=env("EMAIL_PASS"),
-            MIN_CODE=env("MIN_CODE"),
-            MAX_CODE=env("MAX_CODE")
+            MIN_CODE=int(env("MIN_CODE")),
+            MAX_CODE=int(env("MAX_CODE"))
         ),
         variablesData=VariablesData(
             MODE=env("MODE"),

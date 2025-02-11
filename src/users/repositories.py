@@ -22,13 +22,13 @@ class UserRepository:
 
         return unique_id
 
-    async def add_verify_code(self, email: str, code: int) -> None:
+    async def create_verify_code(self, email: str, code: int) -> None:
         async with async_session() as session:
             stmt = insert(VerifyCode).values(email=email, code=code)
             await session.execute(stmt)
             await session.commit()
 
-    async def update_verify_code(self, email: str, code: int):
+    async def update_verify_code(self, email: str, code: int) -> None:
         async with async_session() as session:
             stmt = update(VerifyCode).where(VerifyCode.email == email).values(code=code)
             await session.execute(stmt)

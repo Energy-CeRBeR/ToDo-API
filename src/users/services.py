@@ -49,29 +49,34 @@ class UserService:
         )
         return token
 
-    async def create_verify_code(self, email: str):
+    async def get_verify_code(self, email: str) -> None:
+        potential_user = await self.repository.get_user_by_email(email)
+        if potential_user is not None:
+            raise EmailExistsException()
+
         try:
             code = send_verification_code(email)
             potential_code = await self.repository.get_verify_code_by_email(email)
             if potential_code is not None:
                 await self.repository.update_verify_code(email, code)
             else:
-                await self.repository.add_verify_code(email, code)
-        except smtplib.SMTPRecipientsRefused:
+                await self.repository.create_verify_code(email, code)
+
+        except smtplib.SMTPRecipientsRefused as e:
             raise IncorrectEmailAddressException()
-        except Exception:
+        except Exception as e:
             raise EmailSenderException()
 
-    async def check_verify_code(self, email: str, code: int):
+    async def check_verify_code(self, email: str, code: int) -> bool:
         verify_code = await self.repository.get_verify_code_by_email(email)
         if verify_code is None:
-            raise IncorrectEmailAddressException
+            raise IncorrectEmailAddressException()
 
-        if verify_code.code == code:
-            await self.repository.delete_verify_code_by_id(verify_code.code)
-            return True
+        if verify_code.code != code:
+            raise IncorrectVerifyCodeException()
 
-        return False
+        await self.repository.delete_verify_code_by_id(verify_code.id)
+        return True
 
     def create_access_token(self, user: User) -> str:
         jwt_payload = {
