@@ -28,6 +28,14 @@ class AuthJWT:
 
 
 @dataclass
+class EmailSender:
+    EMAIL_NAME: str
+    EMAIL_PASS: str
+    MIN_CODE: int
+    MAX_CODE: int
+
+
+@dataclass
 class VariablesData:
     MODE: str
     MIN_ID: int
@@ -38,6 +46,7 @@ class VariablesData:
 class Config:
     database: DataBase
     authJWT: AuthJWT
+    email_sender: EmailSender
     variablesData: VariablesData
 
 
@@ -57,6 +66,12 @@ def load_config(path: str | None = None) -> Config:
             private_key_path=AuthJWT.private_key_path,
             public_key_path=AuthJWT.public_key_path,
             algorithm=AuthJWT.algorithm
+        ),
+        email_sender=EmailSender(
+            EMAIL_NAME=env("EMAIL_NAME"),
+            EMAIL_PASS=env("EMAIL_PASS"),
+            MIN_CODE=env("MIN_CODE"),
+            MAX_CODE=env("MAX_CODE")
         ),
         variablesData=VariablesData(
             MODE=env("MODE"),

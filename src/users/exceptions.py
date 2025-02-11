@@ -52,3 +52,27 @@ class AccessException(HTTPException):
 
     def __init__(self):
         super().__init__(status_code=self.status_code, detail=self.detail)
+
+
+class EmailSenderException(HTTPException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    detail = "Failed to send code to email"
+
+    def __init__(self):
+        super().__init__(status_code=self.status_code, detail=self.detail)
+
+
+class IncorrectEmailAddressException(HTTPException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Invalid email address"
+
+    def __init__(self):
+        super().__init__(status_code=self.status_code, detail=self.detail)
+
+
+class IncorrectVerifyCodeException(HTTPException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Incorrect verification code"
+
+    def __init__(self):
+        super().__init__(status_code=self.status_code, detail=self.detail)
