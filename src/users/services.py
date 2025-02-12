@@ -55,7 +55,9 @@ class UserService:
             raise EmailExistsException()
 
         try:
-            code = send_verification_code(email)
+            # Добавить в продакшене
+            # code = send_verification_code(email)
+            code = 77777
             potential_code = await self.repository.get_verify_code_by_email(email)
             if potential_code is not None:
                 await self.repository.update_verify_code(email, code)
@@ -97,7 +99,8 @@ class UserService:
         return self.create_jwt(
             token_type=REFRESH_TOKEN_TYPE,
             token_data=jwt_payload,
-            expire_timedelta=timedelta(days=auth_config.refresh_token_expire_days)
+            expire_timedelta=timedelta(
+                days=auth_config.refresh_token_expire_days)
         )
 
     async def authenticate_user(self, auth_data: UserLogin) -> Optional[User]:
