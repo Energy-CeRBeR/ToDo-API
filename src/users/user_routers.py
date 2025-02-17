@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 
 from src.users.models import User
 from src.users.schemas import UserCreate, Token, RefreshToken, UserResponse, SuccessfulResponse, UserEdit, \
@@ -68,6 +68,15 @@ async def login_for_access_token(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
 ) -> UserResponse:
     return UserResponse(**current_user.to_dict())
+
+
+@router.post("/avatar", response_model=UserResponse)
+async def add_avatar(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        avatar: UploadFile
+) -> UserResponse:
+    upd_user = await UserService().add_avatar(avatar, current_user)
+    return UserResponse(**upd_user.to_dict())
 
 
 @router.put("/edit", response_model=UserResponse)
