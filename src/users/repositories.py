@@ -113,6 +113,15 @@ class UserRepository:
 
         return user
 
+    async def save_avatar_name(self, file_name: str, user: User) -> Optional[User]:
+        async with async_session() as session:
+            stmt = update(User).where(User.id == user.id).values(avatar_path=file_name)
+            await session.execute(stmt)
+            await session.commit()
+
+            user = await self.get_user_by_id(user.id)
+            return user
+
     async def change_admin_status(self, user: User) -> User:
         async with async_session() as session:
             stmt = update(User).where(User.id == user.id).values(is_admin=False if user.is_admin else True)

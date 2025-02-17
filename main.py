@@ -9,6 +9,7 @@ from src.users.user_routers import router as users_router
 from src.users.admin_routers import router as admin_router
 from src.categories.routers import router as categories_router
 from src.tasks.routers import router as tasks_router
+from fastapi.staticfiles import StaticFiles
 
 
 @asynccontextmanager
@@ -22,6 +23,8 @@ app = FastAPI(
     title="ToDo-API",
     lifespan=lifespan
 )
+
+app.mount("/static", StaticFiles(directory="assets"))
 
 origins = [
     "https://energy-cerber.ru",

@@ -1,10 +1,13 @@
+import os
 import smtplib
+import shutil
+from pathlib import Path
 
 import jwt
 
 from datetime import timedelta
 from typing import Optional, List
-from fastapi import Depends
+from fastapi import Depends, UploadFile
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from config_data.config import Config, load_config
@@ -162,6 +165,18 @@ class UserService:
         if user is None:
             raise NotFoundException()
         return user
+
+    async def add_avatar(self, avatar: UploadFile, user: User) -> User:
+        file_name = str(user.id)
+
+        root = Path(__file__).parent.parent.parent
+        assets_dir = os.path.join(root, "assets", "avatars")
+        avatar_path = os.path.join(assets_dir, f"{file_name}.webp")
+
+        with open(avatar_path, "wb+") as avatar_obj:
+            shutil.copyfileobj(avatar.file, avatar_obj)
+
+        return await self.repository.save_avatar_name(file_name, user)
 
     async def get_all_users(self) -> List[User]:
         return await self.repository.get_all_users()

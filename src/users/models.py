@@ -26,6 +26,7 @@ class User(Base):
     short_name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     gender: Mapped[Gender] = mapped_column(default=Gender.male, nullable=False)
+    avatar_path: Mapped[str] = mapped_column(default=None, nullable=True)
     base_category_id: Mapped[int] = mapped_column(default=-1, nullable=False)
     is_admin: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
